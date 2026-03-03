@@ -613,12 +613,159 @@
 
   /* ─── ANIMATIONS ────────────────────────────────────────────────────── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section:not(.hidden) { animation: fadeUp 0.4s ease both; }
+  .section.hidden { display: none; }
+
+  /* GLITCH */
+  .glitch { position: relative; }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, #e4e8f0 0%, #7ab8ff 50%, #00e5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    overflow: hidden;
+  }
+  .glitch::before {
+    left: 2px;
+    animation: glitch1 4s infinite linear;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    filter: hue-rotate(180deg);
+  }
+  .glitch::after {
+    left: -2px;
+    animation: glitch2 4s infinite linear;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    filter: hue-rotate(-90deg);
+  }
+  @keyframes glitch1 {
+    0%,88%,100% { transform: translate(0); opacity: 0; }
+    90% { transform: translate(-4px, 1px); opacity: 0.85; }
+    93% { transform: translate(4px, -1px); opacity: 0.85; }
+    96% { transform: translate(0); opacity: 0; }
+  }
+  @keyframes glitch2 {
+    0%,88%,100% { transform: translate(0); opacity: 0; }
+    91% { transform: translate(4px, 2px); opacity: 0.85; }
+    94% { transform: translate(-4px, -2px); opacity: 0.85; }
+    97% { transform: translate(0); opacity: 0; }
+  }
+
+  /* SCANLINES */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanMove 10s linear infinite;
+  }
+  @keyframes scanMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 200px; }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-30px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(30px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+  /* CARD HOVER GLOW */
+  .spec-card, .content-card, .gpu-mode-card, .fc-card, .tip-item {
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  }
+  .spec-card:hover, .content-card:hover, .gpu-mode-card:hover, .fc-card:hover, .tip-item:hover {
+    border-color: rgba(0,229,255,0.4);
+    box-shadow: 0 0 24px rgba(0,229,255,0.09), 0 6px 28px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
+  }
+
+  /* HUD CORNERS */
+  .hud-corner { position: absolute; width: 16px; height: 16px; pointer-events: none; opacity: 0.55; }
+  .hud-corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .hud-corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+  .hud-corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+  .hud-corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+  /* LOGO PULSE */
+  .logo-hex { animation: logoPulse 3s ease-in-out infinite; transform-origin: center; }
+  @keyframes logoPulse {
+    0%,100% { filter: drop-shadow(0 0 6px rgba(0,229,255,0.5)); }
+    50%      { filter: drop-shadow(0 0 22px rgba(0,229,255,1)); }
+  }
+
+  /* HERO TAGS FLOAT IN */
+  .hero-tag { animation: tagFloat 0.5s ease both; opacity: 0; }
+  .hero-tag:nth-child(1) { animation-delay: 0.7s; }
+  .hero-tag:nth-child(2) { animation-delay: 0.85s; }
+  .hero-tag:nth-child(3) { animation-delay: 1.0s; }
+  .hero-tag:nth-child(4) { animation-delay: 1.15s; }
+  .hero-tag:nth-child(5) { animation-delay: 1.3s; }
+  @keyframes tagFloat {
+    from { opacity: 0; transform: translateY(12px) scale(0.88); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* TYPEWRITER CURSOR */
+  .typewriter-cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); margin-left: 3px; vertical-align: middle; animation: blink 0.75s step-end infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* NAV ACTIVE PULSE */
+  .nav-btn.active { animation: navPulse 2.5s ease-in-out infinite; }
+  @keyframes navPulse {
+    0%,100% { box-shadow: 0 0 0 rgba(0,229,255,0); }
+    50%      { box-shadow: 0 0 12px rgba(0,229,255,0.3); }
+  }
+
+  /* SCORE & FC BAR ANIMATION */
+  .score-fill { transition: width 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+  .fc-bar-fill { transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+
+  /* RADAR PING */
+  .radar-ping { position: absolute; top: 14px; right: 14px; width: 10px; height: 10px; }
+  .radar-ping span {
+    position: absolute; inset: 0; border-radius: 50%; background: var(--accent);
+    animation: radarPulse 2s ease-out infinite;
+  }
+  .radar-ping span:last-child { animation-delay: 1s; }
+  @keyframes radarPulse {
+    0%   { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(4); opacity: 0; }
+  }
+
+  /* DATA STREAM */
+  .data-stream { position: absolute; top: 0; bottom: 0; width: 1px; background: linear-gradient(to bottom, transparent, rgba(0,229,255,0.4), transparent); animation: streamFall linear infinite; pointer-events: none; z-index: 0; }
+  @keyframes streamFall {
+    0%   { transform: translateY(-100%); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  /* HERO MODEL FADE */
+  .hero-model { animation: heroModelIn 0.8s ease 0.2s both; }
+  .hero-sub    { animation: heroModelIn 0.8s ease 0.4s both; }
+  @keyframes heroModelIn {
+    from { opacity: 0; transform: translateY(20px); letter-spacing: 8px; }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .section:not(.hidden) { animation: fadeUp 0.3s ease both; }
-  .section.hidden { display: none; }
+  /* SECTION TITLE LINE */
+  .section-title::before { animation: lineGrow 0.5s ease both; transform-origin: top; }
+  @keyframes lineGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+  /* INFO BOX SLIDE */
+  .info-box { transition: border-color 0.3s, box-shadow 0.3s; }
+  .info-box:hover { box-shadow: 0 0 20px rgba(0,229,255,0.06); }
 
   /* ─── RESPONSIVE ────────────────────────────────────────────────────── */
   @media (max-width: 768px) {
@@ -631,11 +778,23 @@
 </head>
 <body>
 
+<!-- PARTICLE CANVAS -->
+<canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.45;"></canvas>
+
 <!-- ═══════════════════════════════════════ HERO ════════════════════════════ -->
 <div class="hero">
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+  <div class="data-stream" style="left:10%;animation-duration:6s;animation-delay:0s;"></div>
+  <div class="data-stream" style="left:25%;animation-duration:9s;animation-delay:2s;"></div>
+  <div class="data-stream" style="left:50%;animation-duration:7s;animation-delay:1s;"></div>
+  <div class="data-stream" style="left:72%;animation-duration:11s;animation-delay:3s;"></div>
+  <div class="data-stream" style="left:88%;animation-duration:8s;animation-delay:0.5s;"></div>
   <!-- LEGION LOGO -->
   <div style="margin-bottom:24px; position:relative; z-index:1;">
-    <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <svg class="logo-hex" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1"/>
@@ -652,8 +811,8 @@
     </svg>
     <div style="font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:rgba(0,229,255,0.5); margin-top:6px;">LENOVO LEGION</div>
   </div>
-  <div class="hero-eyebrow">⚡ Device Reference Guide · March 2026</div>
-  <div class="hero-model">Lenovo Legion 5</div>
+  <div class="hero-eyebrow" id="heroEyebrow"></div>
+  <div class="hero-model glitch" data-text="Lenovo Legion 5">Lenovo Legion 5</div>
   <div class="hero-sub">15ACH6H · Complete Hardware Reference</div>
   <div class="hero-tags">
     <span class="hero-tag cpu">Ryzen 7 5800H · Zen 3</span>
@@ -1185,6 +1344,7 @@
   <div class="gpu-mode-grid">
 
     <div class="gpu-mode-card active-mode">
+      <div class="radar-ping"><span></span><span></span></div>
       <div class="gmode-label"><span class="tag-cyan" style="font-size:9px;">RECOMMENDED FOR GAMING</span></div>
       <div class="gmode-name" style="color:var(--accent)">Discrete GPU Mode</div>
       <div class="gmode-rows">
@@ -1498,6 +1658,7 @@
 </div>
 
 <script>
+  // ── NAV SECTION SWITCHING ─────────────────────────────────────────────
   const btns = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('[data-section]');
 
@@ -1511,9 +1672,235 @@
       }
     });
     document.getElementById('stickyNav').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(triggerReveal, 100);
+    setTimeout(animateBars, 200);
   }
 
   btns.forEach(b => b.addEventListener('click', () => activate(b.dataset.target)));
+
+  // ── PARTICLE CANVAS ────────────────────────────────────────────────────
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let W, H;
+
+  function resizeCanvas() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(initial) {
+      this.x = Math.random() * W;
+      this.y = initial ? Math.random() * H : H + 10;
+      this.size = Math.random() * 1.5 + 0.3;
+      this.speedY = -(Math.random() * 0.5 + 0.15);
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.5 + 0.1;
+      this.color = Math.random() > 0.7 ? '#7c3aed' : '#00e5ff';
+      this.connected = [];
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      if (this.y < -10) this.reset(false);
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = this.opacity;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+  function drawConnections() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = '#00e5ff';
+          ctx.globalAlpha = (1 - dist/120) * 0.12;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, W, H);
+    drawConnections();
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // ── TYPEWRITER ─────────────────────────────────────────────────────────
+  const eyebrow = document.getElementById('heroEyebrow');
+  const eyebrowText = '⚡ Device Reference Guide · March 2026';
+  let twIndex = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'typewriter-cursor';
+  eyebrow.appendChild(cursor);
+
+  function typeWriter() {
+    if (twIndex < eyebrowText.length) {
+      eyebrow.insertBefore(document.createTextNode(eyebrowText[twIndex]), cursor);
+      twIndex++;
+      setTimeout(typeWriter, 45);
+    }
+  }
+  setTimeout(typeWriter, 400);
+
+  // ── SCROLL REVEAL ──────────────────────────────────────────────────────
+  function triggerReveal() {
+    document.querySelectorAll('.spec-card, .content-card, .tip-item, .info-box, .fc-card, .gpu-mode-card, .section-title, .section-desc').forEach((el, i) => {
+      if (!el.classList.contains('reveal') && !el.classList.contains('reveal-left') && !el.classList.contains('reveal-right')) {
+        el.classList.add(i % 3 === 0 ? 'reveal-left' : i % 3 === 1 ? 'reveal-right' : 'reveal');
+      }
+    });
+    checkReveal();
+  }
+
+  function checkReveal() {
+    const viewH = window.innerHeight;
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach((el, i) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < viewH - 60) {
+        setTimeout(() => el.classList.add('visible'), i * 40);
+      }
+    });
+  }
+
+  window.addEventListener('scroll', checkReveal, { passive: true });
+  setTimeout(triggerReveal, 300);
+
+  // ── BAR ANIMATIONS ─────────────────────────────────────────────────────
+  function animateBars() {
+    // Score bars - store original width in style, animate from 0
+    document.querySelectorAll('.score-fill').forEach(bar => {
+      const w = bar.style.width;
+      if (w && w !== '0%') {
+        bar.setAttribute('data-w', w);
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = bar.getAttribute('data-w'); }, 100);
+      }
+    });
+    // FC bars
+    document.querySelectorAll('.fc-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      if (w && w !== '0%') {
+        bar.setAttribute('data-w', w);
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = bar.getAttribute('data-w'); }, 100);
+      }
+    });
+  }
+
+  // Intersection observer for bars when they scroll into view
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.score-fill, .fc-bar-fill').forEach(bar => {
+          const w = bar.getAttribute('data-w') || bar.style.width;
+          if (w && w !== '0%') {
+            bar.setAttribute('data-w', w);
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = bar.getAttribute('data-w'); }, 150);
+          }
+        });
+        barObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.score-section, .fc-grid, .score-list').forEach(el => barObserver.observe(el));
+
+  // ── HUD CORNER ADD TO SPEC CARDS ──────────────────────────────────────
+  document.querySelectorAll('.spec-card, .gpu-mode-card').forEach(card => {
+    if (!card.querySelector('.hud-corner')) {
+      ['tl','tr','bl','br'].forEach(pos => {
+        const c = document.createElement('div');
+        c.className = `hud-corner ${pos}`;
+        card.style.position = 'relative';
+        card.appendChild(c);
+      });
+    }
+  });
+
+  // ── COUNTER ANIMATION on numbers ──────────────────────────────────────
+  function animateCounter(el, target, duration) {
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { start = target; clearInterval(timer); }
+      el.textContent = Math.round(start).toLocaleString();
+    }, 16);
+  }
+
+  // ── CURSOR GLOW TRAIL ─────────────────────────────────────────────────
+  const trail = document.createElement('div');
+  trail.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;pointer-events:none;z-index:1;transition:all 0.15s ease;background:radial-gradient(circle,rgba(0,229,255,0.04) 0%,transparent 70%);transform:translate(-50%,-50%)';
+  document.body.appendChild(trail);
+  document.addEventListener('mousemove', e => {
+    trail.style.left = e.clientX + 'px';
+    trail.style.top  = e.clientY + 'px';
+  });
+
+  // ── SPEC ROW HOVER HIGHLIGHT ──────────────────────────────────────────
+  document.querySelectorAll('.spec-row').forEach(row => {
+    row.addEventListener('mouseenter', () => {
+      row.style.background = 'rgba(0,229,255,0.04)';
+      row.style.paddingLeft = '24px';
+      row.style.transition = 'all 0.2s ease';
+    });
+    row.addEventListener('mouseleave', () => {
+      row.style.background = '';
+      row.style.paddingLeft = '';
+    });
+  });
+
+  // ── SECTION TITLE STAGGER ─────────────────────────────────────────────
+  document.querySelectorAll('.section-title').forEach(title => {
+    title.style.opacity = '0';
+    title.style.transform = 'translateX(-20px)';
+    title.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  });
+
+  const titleObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateX(0)';
+        titleObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.section-title').forEach(t => titleObserver.observe(t));
+
+  // ── TAG BLINK on hover ────────────────────────────────────────────────
+  document.querySelectorAll('.tag-green, .tag-yellow, .tag-cyan').forEach(tag => {
+    tag.addEventListener('mouseenter', () => {
+      tag.style.boxShadow = '0 0 8px currentColor';
+      tag.style.transition = 'box-shadow 0.2s';
+    });
+    tag.addEventListener('mouseleave', () => { tag.style.boxShadow = ''; });
+  });
 </script>
 </body>
 </html>
