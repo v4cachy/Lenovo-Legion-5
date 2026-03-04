@@ -1004,14 +1004,57 @@
     });
   }
 
-  // Show "click to play" tooltip on first interaction
-  let firstPlay = true;
-  document.getElementById('musicToggleBtn').addEventListener('click', () => {
-    if (firstPlay && panelOpen) {
-      firstPlay = false;
-    }
-  });
+  // ── AUTOPLAY ON FIRST INTERACTION ────────────────────────────────────
+  // Browsers block autoplay with sound — this plays music on the first
+  // click/tap anywhere on the page, which browsers allow.
+  let autoStarted = false;
+
+  function autoStart() {
+    if (autoStarted) return;
+    autoStarted = true;
+    audio.play().then(() => {
+      playBtn.textContent = '⏸';
+      startViz();
+    }).catch(() => {
+      // If browser still blocks it, user can manually press play
+    });
+    document.removeEventListener('click', autoStart);
+    document.removeEventListener('keydown', autoStart);
+    document.removeEventListener('touchstart', autoStart);
+  }
+
+  document.addEventListener('click',      autoStart);
+  document.addEventListener('keydown',    autoStart);
+  document.addEventListener('touchstart', autoStart);
 </script>
+
+  <div id="clickHint" style="
+    position: fixed;
+    bottom: 82px;
+    right: 24px;
+    z-index: 9997;
+    background: rgba(8,10,15,0.9);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(0,229,255,0.6);
+    backdrop-filter: blur(10px);
+    animation: hintFade 3s ease 1.5s both;
+    pointer-events: none;
+  ">🎵 Click anywhere to start music</div>
+
+  <style>
+    @keyframes hintFade {
+      0%   { opacity:0; transform:translateY(6px); }
+      20%  { opacity:1; transform:translateY(0); }
+      70%  { opacity:1; }
+      100% { opacity:0; }
+    }
+  </style>
 
 <!-- PARTICLE CANVAS -->
 <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.45;"></canvas>
