@@ -376,17 +376,7 @@ code {
   font-style: italic !important;
 }
 
-/* ── STATUS BADGE ────────────────────────────────────────────────────────── */
-.status-badge {
-  background: rgba(57,255,20,0.06) !important;
-  border-color: rgba(57,255,20,0.3) !important;
-  border-radius: 0 !important;
-  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%) !important;
-  text-shadow: 0 0 8px rgba(57,255,20,0.6) !important;
-}
-.status-dot {
-  box-shadow: 0 0 8px rgba(57,255,20,0.8), 0 0 16px rgba(57,255,20,0.4) !important;
-}
+/* status badge — see nav section above */
 
 /* ── FOOTER ──────────────────────────────────────────────────────────────── */
 .footer {
@@ -940,37 +930,50 @@ document.addEventListener('touchstart', autoStart);</script> <div id="clickHint"
 <div class="hero"> <div class="hud-corner tl"></div> <div class="hud-corner tr"></div> <div class="hud-corner bl"></div> <div class="hud-corner br"></div> <div class="data-stream" style="left:10%;animation-duration:6s;animation-delay:0s;"></div> <div class="data-stream" style="left:25%;animation-duration:9s;animation-delay:2s;"></div> <div class="data-stream" style="left:50%;animation-duration:7s;animation-delay:1s;"></div> <div class="data-stream" style="left:72%;animation-duration:11s;animation-delay:3s;"></div> <div class="data-stream" style="left:88%;animation-duration:8s;animation-delay:0.5s;"></div>  <div style="margin-bottom:24px; position:relative; z-index:1;"> <svg class="logo-hex" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"> <defs> <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" style="stop-color:#FFD600;stop-opacity:1"/> <stop offset="100%" style="stop-color:#CC8800;stop-opacity:1"/> </linearGradient> <filter id="glow"> <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/> <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge> </filter> </defs> <polygon points="36,4 66,20 66,52 36,68 6,52 6,20" fill="rgba(255,214,0,0.08)" stroke="url(#hexGrad)" stroke-width="2" filter="url(#glow)"/> <polygon points="36,14 58,26 58,46 36,58 14,46 14,26" fill="none" stroke="rgba(255,214,0,0.28)" stroke-width="1"/> <text x="36" y="46" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#hexGrad)" text-anchor="middle" filter="url(#glow)">L</text> </svg> <div style="font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:rgba(255,214,0,0.5); margin-top:6px;">LENOVO LEGION</div> </div> <div class="hero-eyebrow" id="heroEyebrow"></div> <div class="hero-model glitch" data-text="Lenovo Legion 5">Lenovo Legion 5</div> <div class="hero-sub">15ACH6H · Complete Hardware Reference</div> <div class="hero-tags"> <span class="hero-tag cpu">Ryzen 7 5800H · Zen 3</span> <span class="hero-tag gpu">RTX 3060 · 130W · 6GB</span> <span class="hero-tag display">165Hz FHD · Dolby Vision</span> <span class="hero-tag os">⚡ CachyOS KDE</span> <span class="hero-tag year">2021 · AMD Advantage</span> </div> <div class="hero-model-id">Model: 82JU · BIOS: GKCN58WW / GKCN57WW</div>
 </div> 
 <style>
-.nav-wrapper{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:0 0;}
-.nav-inner{flex:1;overflow-x:auto;}
-.status-badge{
-  flex-shrink:0;
-  display:flex;align-items:center;gap:7px;
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:11px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--green);
-  background:rgba(0,255,136,0.06);
-  border:1px solid rgba(0,255,136,0.22);
-  border-radius:3px;
-  padding:5px 12px;
-  white-space:nowrap;
-  user-select:none;
+/* nav-wrapper is now just a width-limiter, no flex fighting */
+.nav-wrapper { position: relative; }
+.nav-inner {
+  max-width: calc(100% - 110px); /* reserve right space for status badge */
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 10px 0;
 }
-.status-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 6px var(--green);
-  animation:statusPulse 2.2s ease-in-out infinite;
-  flex-shrink:0;
+.nav-inner::-webkit-scrollbar { display: none; }
+
+/* Status badge: absolutely pinned to right of sticky-nav */
+.status-badge {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green);
+  background: rgba(57,255,20,0.06);
+  border: 1px solid rgba(57,255,20,0.22);
+  padding: 5px 12px;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 10;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
 }
-@keyframes statusPulse{
-  0%,100%{box-shadow:0 0 4px rgba(0,255,136,0.6);opacity:1;}
-  50%{box-shadow:0 0 12px rgba(0,255,136,1),0 0 20px rgba(0,255,136,0.4);opacity:0.85;}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: statusPulse 2.2s ease-in-out infinite;
+  flex-shrink: 0;
 }
-@media(max-width:600px){.status-badge span.status-text{display:none}}
+@keyframes statusPulse {
+  0%,100% { box-shadow: 0 0 4px rgba(57,255,20,0.6); opacity: 1; }
+  50%      { box-shadow: 0 0 14px rgba(57,255,20,1), 0 0 24px rgba(57,255,20,0.4); opacity: 0.85; }
+}
+@media(max-width:600px) { .status-badge span.status-text { display: none; } .nav-inner { max-width: calc(100% - 60px); } }
 </style>
 <div class="sticky-nav" id="stickyNav">
 <div class="nav-wrapper">
-<div class="nav-inner" style="padding:10px 0"> <button class="nav-btn active" data-target="all">All</button> <button class="nav-btn" data-target="overview">Overview</button> <button class="nav-btn" data-target="cpu">CPU</button> <button class="nav-btn" data-target="gpu">GPU</button> <button class="nav-btn" data-target="display">Display</button> <button class="nav-btn" data-target="platform">Platform</button> <button class="nav-btn" data-target="cachyos">CachyOS</button> <button class="nav-btn" data-target="gaming">Gaming on Linux</button> <button class="nav-btn" data-target="gpu-modes">GPU Modes</button> <button class="nav-btn" data-target="fancurve">Fan Curves</button> <button class="nav-btn" data-target="battery">Battery</button> <button class="nav-btn" data-target="tips">Tips & Commands</button> <button class="nav-btn nav-btn-icon" data-target="setup-guide" title="Setup Guide">⚡<span class="nav-icon-tooltip">POST-INSTALL SETUP GUIDE</span></button> </div>
+<div class="nav-inner"> <button class="nav-btn active" data-target="all">All</button> <button class="nav-btn" data-target="overview">Overview</button> <button class="nav-btn" data-target="cpu">CPU</button> <button class="nav-btn" data-target="gpu">GPU</button> <button class="nav-btn" data-target="display">Display</button> <button class="nav-btn" data-target="platform">Platform</button> <button class="nav-btn" data-target="cachyos">CachyOS</button> <button class="nav-btn" data-target="gaming">Gaming on Linux</button> <button class="nav-btn" data-target="gpu-modes">GPU Modes</button> <button class="nav-btn" data-target="fancurve">Fan Curves</button> <button class="nav-btn" data-target="battery">Battery</button> <button class="nav-btn" data-target="tips">Tips & Commands</button> <button class="nav-btn nav-btn-icon" data-target="setup-guide" title="Setup Guide">⚡<span class="nav-icon-tooltip">POST-INSTALL SETUP GUIDE</span></button> </div>
 <div class="status-badge">
   <span class="status-dot"></span>
   <span class="status-text">Online</span>
