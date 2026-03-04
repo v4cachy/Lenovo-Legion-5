@@ -778,6 +778,241 @@
 </head>
 <body>
 
+<!-- FLOATING MUSIC PLAYER -->
+<div id="musicPlayer" style="
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+">
+  <!-- Expanded panel -->
+  <div id="musicPanel" style="
+    background: rgba(8,10,15,0.95);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    min-width: 220px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 30px rgba(0,229,255,0.1), 0 8px 32px rgba(0,0,0,0.6);
+    display: none;
+    animation: playerSlideUp 0.25s ease both;
+  ">
+    <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:rgba(0,229,255,0.5); margin-bottom:6px;">NOW PLAYING</div>
+    <div style="font-size:13px; font-weight:700; color:#e4e8f0; margin-bottom:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" id="trackName">bgmusic.flac</div>
+
+    <!-- Progress bar -->
+    <div id="progressTrack" style="height:3px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:12px; cursor:pointer; position:relative;">
+      <div id="progressFill" style="height:100%; width:0%; background:linear-gradient(90deg,#0099bb,#00e5ff); border-radius:2px; transition:width 0.5s linear;"></div>
+    </div>
+
+    <!-- Time -->
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:rgba(107,116,148,0.8); margin-bottom:12px; letter-spacing:1px;">
+      <span id="timeNow">0:00</span>
+      <span id="timeTotal">--:--</span>
+    </div>
+
+    <!-- Controls -->
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button id="playPauseBtn" onclick="toggleMusic()" style="
+        width:36px; height:36px;
+        border-radius:50%;
+        border:none;
+        background:linear-gradient(135deg,#0099bb,#00e5ff);
+        color:#080a0f;
+        font-size:14px;
+        cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:0 0 12px rgba(0,229,255,0.4);
+        transition:all 0.2s;
+        flex-shrink:0;
+      ">▶</button>
+
+      <!-- Volume -->
+      <div style="display:flex; align-items:center; gap:6px; flex:1;">
+        <span style="font-size:12px; color:rgba(107,116,148,0.8);">🔊</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="60"
+          oninput="setVolume(this.value)"
+          style="
+            flex:1;
+            height:3px;
+            -webkit-appearance:none;
+            background:linear-gradient(90deg,#00e5ff 60%,rgba(255,255,255,0.1) 60%);
+            border-radius:2px;
+            outline:none;
+            cursor:pointer;
+          ">
+      </div>
+    </div>
+
+    <!-- Visualizer bars -->
+    <div id="visualizer" style="display:flex; align-items:flex-end; gap:3px; height:20px; margin-top:12px; opacity:0.5;">
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+      <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Toggle button -->
+  <button id="musicToggleBtn" onclick="togglePanel()" style="
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,229,255,0.4);
+    background: rgba(8,10,15,0.95);
+    color: #00e5ff;
+    font-size: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 20px rgba(0,229,255,0.15), 0 4px 16px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+    animation: musicBtnPulse 3s ease-in-out infinite;
+  " title="Music Player">🎵</button>
+</div>
+
+<audio id="bgAudio" src="bgmusic.flac" loop preload="metadata"></audio>
+
+<style>
+  @keyframes playerSlideUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes musicBtnPulse {
+    0%,100% { box-shadow:0 0 20px rgba(0,229,255,0.15), 0 4px 16px rgba(0,0,0,0.5); }
+    50%      { box-shadow:0 0 28px rgba(0,229,255,0.4),  0 4px 16px rgba(0,0,0,0.5); }
+  }
+  #musicToggleBtn:hover {
+    background: rgba(0,229,255,0.1) !important;
+    transform: scale(1.08);
+  }
+  #playPauseBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0,229,255,0.7) !important;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #00e5ff;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0,229,255,0.6);
+  }
+  #progressTrack:hover #progressFill {
+    box-shadow: 0 0 8px rgba(0,229,255,0.6);
+  }
+  @keyframes vizDance {
+    0%,100% { height: 4px; }
+    50%      { height: var(--max-h); }
+  }
+  .viz-bar.playing {
+    animation: vizDance ease-in-out infinite;
+  }
+</style>
+
+<script>
+  const audio       = document.getElementById('bgAudio');
+  const playBtn     = document.getElementById('playPauseBtn');
+  const panel       = document.getElementById('musicPanel');
+  const progFill    = document.getElementById('progressFill');
+  const progTrack   = document.getElementById('progressTrack');
+  const timeNow     = document.getElementById('timeNow');
+  const timeTotal   = document.getElementById('timeTotal');
+  const volSlider   = document.getElementById('volumeSlider');
+  const vizBars     = document.querySelectorAll('.viz-bar');
+  let panelOpen     = false;
+  let vizInterval   = null;
+
+  audio.volume = 0.6;
+
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    panel.style.display = panelOpen ? 'block' : 'none';
+  }
+
+  function toggleMusic() {
+    if (audio.paused) {
+      audio.play();
+      playBtn.textContent = '⏸';
+      startViz();
+    } else {
+      audio.pause();
+      playBtn.textContent = '▶';
+      stopViz();
+    }
+  }
+
+  function setVolume(val) {
+    audio.volume = val / 100;
+    const pct = val + '%';
+    volSlider.style.background = `linear-gradient(90deg,#00e5ff ${pct},rgba(255,255,255,0.1) ${pct})`;
+  }
+
+  function formatTime(s) {
+    if (isNaN(s)) return '--:--';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progFill.style.width = pct + '%';
+      timeNow.textContent   = formatTime(audio.currentTime);
+      timeTotal.textContent = formatTime(audio.duration);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    timeTotal.textContent = formatTime(audio.duration);
+  });
+
+  // Click progress bar to seek
+  progTrack.addEventListener('click', (e) => {
+    const rect = progTrack.getBoundingClientRect();
+    const pct  = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+
+  // Fake visualizer animation
+  const vizHeights = [8,14,18,12,20,16,10,18,14,8,16,12];
+  function startViz() {
+    vizBars.forEach((bar, i) => {
+      bar.style.setProperty('--max-h', vizHeights[i] + 'px');
+      bar.classList.add('playing');
+      bar.style.animationDuration = (0.4 + Math.random() * 0.5) + 's';
+      bar.style.animationDelay    = (Math.random() * 0.3) + 's';
+    });
+  }
+  function stopViz() {
+    vizBars.forEach(bar => {
+      bar.classList.remove('playing');
+      bar.style.height = '4px';
+    });
+  }
+
+  // Show "click to play" tooltip on first interaction
+  let firstPlay = true;
+  document.getElementById('musicToggleBtn').addEventListener('click', () => {
+    if (firstPlay && panelOpen) {
+      firstPlay = false;
+    }
+  });
+</script>
+
 <!-- PARTICLE CANVAS -->
 <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.45;"></canvas>
 
