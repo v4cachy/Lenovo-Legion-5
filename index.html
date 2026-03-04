@@ -931,9 +931,9 @@ document.addEventListener('touchstart', autoStart);</script> <div id="clickHint"
 </div> 
 <style>
 /* nav-wrapper is now just a width-limiter, no flex fighting */
-.nav-wrapper { position: relative; }
+.nav-wrapper { position: relative; max-width: 1120px; margin: 0 auto; }
 .nav-inner {
-  max-width: calc(100% - 110px); /* reserve right space for status badge */
+  max-width: calc(100% - 110px);
   overflow-x: auto;
   scrollbar-width: none;
   padding: 10px 0;
