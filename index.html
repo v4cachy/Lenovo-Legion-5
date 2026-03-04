@@ -84,7 +84,7 @@ body {
 body > *:not(#cp-ticker):not(.jp-side-left):not(.jp-side-right):not(style):not(script) {
   margin-top: 0;
 }
-.hero, #musicPlayer, #clickHint, canvas#particleCanvas {
+.hero, canvas#particleCanvas {
   margin-top: 26px;
 }
 canvas#particleCanvas { top: 26px !important; }
@@ -413,11 +413,6 @@ code {
 }
 
 /* ── MUSIC PLAYER ────────────────────────────────────────────────────────── */
-#musicPanel {
-  border-radius: 0 !important;
-  border-color: rgba(255,214,0,0.4) !important;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%) !important;
-}
 
 /* ── GLITCH — now yellow+red ─────────────────────────────────────────────── */
 .glitch::before {
@@ -768,164 +763,227 @@ if (ticker) {
 <!-- ★ VERTICAL SIDE DECORATIONS ★ -->
 <div class="jp-side-left" aria-hidden="true">電脳<br>未来<br>軍団<br>危険<br>夜市<br>サイバー<br>システム</div>
 <div class="jp-side-right" aria-hidden="true">2077<br>東京<br>電脳<br>破壊<br>ネット<br>接続中<br>装甲</div>
-<div id="musicPlayer" style="
+<!-- ══════════════════════════════════════════════════
+     🎵 LOFI GIRL RADIO  //  24/7 Licensed Stream
+══════════════════════════════════════════════════ -->
+<div id="lofiRadio">
+  <!-- Hidden YouTube iframe -->
+  <div id="lofiYT" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;">
+    <iframe id="lofiFrame" width="1" height="1"
+      src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&enablejsapi=1&loop=1"
+      frameborder="0" allow="autoplay; encrypted-media"
+      allowfullscreen></iframe>
+  </div>
+
+  <!-- Panel -->
+  <div id="lofiPanel">
+    <div class="lf-header">
+      <span class="lf-station">📻 LOFI GIRL RADIO</span>
+      <span class="lf-live">LIVE</span>
+    </div>
+    <div class="lf-track">lofi hip hop · beats to relax/study to</div>
+    <div class="lf-viz" id="lfViz">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="lf-controls">
+      <button id="lfBtn" onclick="lofiToggle()">▶</button>
+      <div class="lf-vol-wrap">
+        <span>🔊</span>
+        <input type="range" id="lfVol" min="0" max="100" value="60"
+          oninput="lofiVol(this.value)">
+      </div>
+    </div>
+    <div class="lf-credit">Lofi Girl · youtube.com/lofigirl · Licensed</div>
+  </div>
+
+  <!-- Toggle button -->
+  <button id="lofiToggleBtn" onclick="lofiPanelToggle()" title="Lofi Radio">🎵</button>
+</div>
+
+<style>
+#lofiRadio {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 24px; right: 24px;
   z-index: 9998;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
   font-family: 'Barlow Condensed', sans-serif;
-">  <div id="musicPanel" style="
-    background: rgba(8,10,15,0.95);
-    border: 1px solid rgba(255,214,0,0.3);
-    border-radius: 8px;
-    padding: 14px 18px;
-    min-width: 220px;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 0 30px rgba(255,214,0,0.1), 0 8px 32px rgba(0,0,0,0.6);
-    display: none;
-    animation: playerSlideUp 0.25s ease both;
-  "> <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:rgba(255,214,0,0.5); margin-bottom:6px;">NOW PLAYING</div> <div style="font-size:13px; font-weight:700; color:#e4e8f0; margin-bottom:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" id="trackName">bgmusic.flac</div>  <div id="progressTrack" style="height:3px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:12px; cursor:pointer; position:relative;"> <div id="progressFill" style="height:100%; width:0%; background:linear-gradient(90deg,#CC8800,#FFD600); border-radius:2px; transition:width 0.5s linear;"></div> </div>  <div style="display:flex; justify-content:space-between; font-size:10px; color:rgba(107,116,148,0.8); margin-bottom:12px; letter-spacing:1px;"> <span id="timeNow">0:00</span> <span id="timeTotal">--:--</span> </div>  <div style="display:flex; align-items:center; gap:10px;"> <button id="playPauseBtn" onclick="toggleMusic()" style="
-        width:36px; height:36px;
-        border-radius:50%;
-        border:none;
-        background:linear-gradient(135deg,#CC8800,#FFD600);
-        color:#080a0f;
-        font-size:14px;
-        cursor:pointer;
-        display:flex; align-items:center; justify-content:center;
-        box-shadow:0 0 12px rgba(255,214,0,0.4);
-        transition:all 0.2s;
-        flex-shrink:0;
-      ">▶</button>  <div style="display:flex; align-items:center; gap:6px; flex:1;"> <span style="font-size:12px; color:rgba(107,116,148,0.8);">🔊</span> <input type="range" id="volumeSlider" min="0" max="100" value="60"
-          oninput="setVolume(this.value)"
-          style="
-            flex:1;
-            height:3px;
-            -webkit-appearance:none;
-            background:linear-gradient(90deg,#FFD600 60%,rgba(255,255,255,0.1) 60%);
-            border-radius:2px;
-            outline:none;
-            cursor:pointer;
-          "> </div> </div>  <div id="visualizer" style="display:flex; align-items:flex-end; gap:3px; height:20px; margin-top:12px; opacity:0.5;"> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> <div class="viz-bar" style="width:4px;background:var(--accent);border-radius:2px;height:4px;"></div> </div> </div>  <button id="musicToggleBtn" onclick="togglePanel()" style="
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,214,0,0.4);
-    background: rgba(8,10,15,0.95);
-    color: #FFD600;
-    font-size: 20px;
-    cursor: pointer;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 0 20px rgba(0,229,255,0.15), 0 4px 16px rgba(0,0,0,0.5);
-    transition: all 0.2s ease;
-    display: flex; align-items: center; justify-content: center;
-    animation: musicBtnPulse 3s ease-in-out infinite;
-  " title="Music Player">🎵</button>
-</div> <link rel="prefetch" href="bgmusic.flac" as="audio"><audio id="bgAudio" src="bgmusic.flac" loop preload="none"></audio> <style>@keyframes playerSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes musicBtnPulse{0%,100%{box-shadow:0 0 20px rgba(0,229,255,0.15),0 4px 16px rgba(0,0,0,0.5)}50%{box-shadow:0 0 28px rgba(255,214,0,0.4),0 4px 16px rgba(0,0,0,0.5)}}#musicToggleBtn:hover{background:rgba(255,214,0,0.1) !important;transform:scale(1.08)}#playPauseBtn:hover{transform:scale(1.1);box-shadow:0 0 20px rgba(0,229,255,0.7) !important}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#FFD600;cursor:pointer;box-shadow:0 0 6px rgba(255,214,0,0.6)}#progressTrack:hover #progressFill{box-shadow:0 0 8px rgba(255,214,0,0.6)}@keyframes vizDance{0%,100%{height:4px}50%{height:var(--max-h)}}.viz-bar.playing{animation:vizDance ease-in-out infinite}</style> <script>const audio       = document.getElementById('bgAudio');
-const playBtn     = document.getElementById('playPauseBtn');
-const panel       = document.getElementById('musicPanel');
-const progFill    = document.getElementById('progressFill');
-const progTrack   = document.getElementById('progressTrack');
-const timeNow     = document.getElementById('timeNow');
-const timeTotal   = document.getElementById('timeTotal');
-const volSlider   = document.getElementById('volumeSlider');
-const vizBars     = document.querySelectorAll('.viz-bar');
-let panelOpen     = false;
-let vizInterval   = null;
-audio.volume = 0.6;
-function togglePanel() {
-panelOpen = !panelOpen;
-panel.style.display = panelOpen ? 'block' : 'none';
 }
-function toggleMusic() {
-if (audio.paused) {
-audio.play();
-playBtn.textContent = '⏸';
-startViz();
-} else {
-audio.pause();
-playBtn.textContent = '▶';
-stopViz();
+#lofiPanel {
+  display: none;
+  background: rgba(3,3,10,0.97);
+  border: 1px solid rgba(255,214,0,0.35);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  padding: 14px 18px;
+  min-width: 230px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(255,214,0,0.1), 0 8px 32px rgba(0,0,0,0.7);
+  animation: playerSlideUp 0.2s ease both;
 }
+.lf-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
 }
-function setVolume(val) {
-audio.volume = val / 100;
-const pct = val + '%';
-volSlider.style.background = `linear-gradient(90deg,#FFD600 ${pct},rgba(255,255,255,0.1) ${pct})`;
+.lf-station {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,214,0,0.7); font-weight: 700;
 }
-function formatTime(s) {
-if (isNaN(s)) return '--:--';
-const m = Math.floor(s / 60);
-const sec = Math.floor(s % 60).toString().padStart(2, '0');
-return `${m}:${sec}`;
+.lf-live {
+  font-size: 9px; letter-spacing: 3px;
+  color: #FF003C; border: 1px solid rgba(255,0,60,0.5);
+  background: rgba(255,0,60,0.1); padding: 2px 6px;
+  animation: livePulse 1.4s ease-in-out infinite;
 }
-audio.addEventListener('timeupdate', () => {
-if (audio.duration) {
-const pct = (audio.currentTime / audio.duration) * 100;
-progFill.style.width = pct + '%';
-timeNow.textContent   = formatTime(audio.currentTime);
-timeTotal.textContent = formatTime(audio.duration);
+@keyframes livePulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.4; }
 }
-});
-audio.addEventListener('loadedmetadata', () => {
-timeTotal.textContent = formatTime(audio.duration);
-});
-progTrack.addEventListener('click', (e) => {
-const rect = progTrack.getBoundingClientRect();
-const pct  = (e.clientX - rect.left) / rect.width;
-audio.currentTime = pct * audio.duration;
-});
-const vizHeights = [8,14,18,12,20,16,10,18,14,8,16,12];
-function startViz() {
-vizBars.forEach((bar, i) => {
-bar.style.setProperty('--max-h', vizHeights[i] + 'px');
-bar.classList.add('playing');
-bar.style.animationDuration = (0.4 + Math.random() * 0.5) + 's';
-bar.style.animationDelay    = (Math.random() * 0.3) + 's';
-});
+.lf-track {
+  font-size: 11.5px; color: #EDE0C4; margin-bottom: 10px;
+  font-style: italic; letter-spacing: 0.3px;
 }
-function stopViz() {
-vizBars.forEach(bar => {
-bar.classList.remove('playing');
-bar.style.height = '4px';
-});
+.lf-viz {
+  display: flex; align-items: flex-end; gap: 3px;
+  height: 18px; margin-bottom: 12px; opacity: 0.6;
 }
-let autoStarted = false;
-function autoStart() {
-if (autoStarted) return;
-autoStarted = true;
-audio.play().then(() => {
-playBtn.textContent = '⏸';
-startViz();
-}).catch(() => {
-});
-document.removeEventListener('click', autoStart);
-document.removeEventListener('keydown', autoStart);
-document.removeEventListener('touchstart', autoStart);
+.lf-viz span {
+  width: 4px; background: var(--cp-yellow, #FFD600);
+  border-radius: 0; height: 3px;
+  transition: height 0.1s ease;
 }
-document.addEventListener('click',      autoStart);
-document.addEventListener('keydown',    autoStart);
-document.addEventListener('touchstart', autoStart);</script> <div id="clickHint" style="
-    position: fixed;
-    bottom: 82px;
-    right: 24px;
-    z-index: 9997;
-    background: rgba(8,10,15,0.9);
-    border: 1px solid rgba(255,214,0,0.28);
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,214,0,0.6);
-    backdrop-filter: blur(10px);
-    animation: hintFade 3s ease 1.5s both;
-    pointer-events: none;
-  ">🎵 Click anywhere to start music</div> <style>@keyframes hintFade{0%{opacity:0;transform:translateY(6px)}20%{opacity:1;transform:translateY(0)}70%{opacity:1}100%{opacity:0}}</style> 
+#lofiRadio.playing .lf-viz span:nth-child(1) { animation: lfBar 0.6s ease-in-out infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(2) { animation: lfBar 0.5s ease-in-out 0.1s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(3) { animation: lfBar 0.7s ease-in-out 0.05s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(4) { animation: lfBar 0.4s ease-in-out 0.2s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(5) { animation: lfBar 0.65s ease-in-out 0.15s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(6) { animation: lfBar 0.55s ease-in-out 0.08s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(7) { animation: lfBar 0.75s ease-in-out 0.25s infinite; }
+#lofiRadio.playing .lf-viz span:nth-child(8) { animation: lfBar 0.45s ease-in-out 0.12s infinite; }
+@keyframes lfBar {
+  0%,100% { height: 3px; } 50% { height: 16px; }
+}
+.lf-controls {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+#lfBtn {
+  width: 36px; height: 36px;
+  background: var(--cp-yellow, #FFD600);
+  border: none; color: #03030A;
+  font-size: 14px; cursor: pointer;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease; font-weight: 900;
+  box-shadow: 0 0 14px rgba(255,214,0,0.4);
+  flex-shrink: 0;
+}
+#lfBtn:hover { box-shadow: 0 0 24px rgba(255,214,0,0.8); transform: scale(1.06); }
+.lf-vol-wrap {
+  display: flex; align-items: center; gap: 6px; flex: 1;
+  font-size: 12px; color: rgba(255,214,0,0.5);
+}
+#lfVol {
+  flex: 1; height: 3px; -webkit-appearance: none;
+  background: linear-gradient(90deg, #FFD600 60%, rgba(255,255,255,0.1) 60%);
+  border-radius: 0; outline: none; cursor: pointer;
+}
+#lfVol::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 10px;
+  background: #FFD600; cursor: pointer;
+  box-shadow: 0 0 6px rgba(255,214,0,0.7);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.lf-credit {
+  font-size: 9px; color: rgba(255,214,0,0.25);
+  letter-spacing: 1px; text-align: right;
+}
+#lofiToggleBtn {
+  width: 48px; height: 48px;
+  background: rgba(3,3,10,0.95);
+  border: 1px solid rgba(255,214,0,0.4);
+  color: #FFD600; font-size: 20px; cursor: pointer;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 20px rgba(255,214,0,0.15), 0 4px 16px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
+  display: flex; align-items: center; justify-content: center;
+  animation: musicBtnPulse 3s ease-in-out infinite;
+}
+#lofiToggleBtn:hover {
+  background: rgba(255,214,0,0.1) !important;
+  box-shadow: 0 0 30px rgba(255,214,0,0.4) !important;
+  transform: scale(1.08);
+}
+@keyframes musicBtnPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(255,214,0,0.15), 0 4px 16px rgba(0,0,0,0.5); }
+  50%      { box-shadow: 0 0 30px rgba(255,214,0,0.45), 0 4px 16px rgba(0,0,0,0.5); }
+}
+</style>
+
+<script>
+var lofiPlaying = false;
+var lofiPanelOpen = false;
+var lofiPlayer = null;
+
+function lofiPanelToggle() {
+  lofiPanelOpen = !lofiPanelOpen;
+  document.getElementById('lofiPanel').style.display = lofiPanelOpen ? 'block' : 'none';
+}
+
+// Load YouTube IFrame API
+(function() {
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+
+function onYouTubeIframeAPIReady() {
+  lofiPlayer = new YT.Player('lofiFrame', {
+    events: {
+      onReady: function(e) {
+        e.target.setVolume(60);
+      }
+    }
+  });
+}
+
+function lofiToggle() {
+  var btn = document.getElementById('lfBtn');
+  var radio = document.getElementById('lofiRadio');
+  if (!lofiPlayer) return;
+  if (lofiPlaying) {
+    lofiPlayer.pauseVideo();
+    lofiPlaying = false;
+    btn.textContent = '▶';
+    radio.classList.remove('playing');
+  } else {
+    lofiPlayer.playVideo();
+    lofiPlaying = true;
+    btn.textContent = '⏸';
+    radio.classList.add('playing');
+  }
+}
+
+function lofiVol(val) {
+  if (lofiPlayer) lofiPlayer.setVolume(parseInt(val));
+  var pct = val + '%';
+  document.getElementById('lfVol').style.background =
+    'linear-gradient(90deg,#FFD600 ' + pct + ',rgba(255,255,255,0.1) ' + pct + ')';
+}
+
+// Auto-start on first interaction
+var lofiAutoStarted = false;
+function lofiAutoStart() {
+  if (lofiAutoStarted || !lofiPlayer) return;
+  lofiAutoStarted = true;
+  lofiPlayer.playVideo();
+  lofiPlaying = true;
+  document.getElementById('lfBtn').textContent = '⏸';
+  document.getElementById('lofiRadio').classList.add('playing');
+  document.removeEventListener('click', lofiAutoStart);
+  document.removeEventListener('keydown', lofiAutoStart);
+}
+document.addEventListener('click', lofiAutoStart);
+document.addEventListener('keydown', lofiAutoStart);
+</script>
 <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.45;"></canvas> 
 <div class="hero"> <div class="hud-corner tl"></div> <div class="hud-corner tr"></div> <div class="hud-corner bl"></div> <div class="hud-corner br"></div> <div class="data-stream" style="left:10%;animation-duration:6s;animation-delay:0s;"></div> <div class="data-stream" style="left:25%;animation-duration:9s;animation-delay:2s;"></div> <div class="data-stream" style="left:50%;animation-duration:7s;animation-delay:1s;"></div> <div class="data-stream" style="left:72%;animation-duration:11s;animation-delay:3s;"></div> <div class="data-stream" style="left:88%;animation-duration:8s;animation-delay:0.5s;"></div>  <div style="margin-bottom:24px; position:relative; z-index:1;"> <svg class="logo-hex" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"> <defs> <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" style="stop-color:#FFD600;stop-opacity:1"/> <stop offset="100%" style="stop-color:#CC8800;stop-opacity:1"/> </linearGradient> <filter id="glow"> <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/> <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge> </filter> </defs> <polygon points="36,4 66,20 66,52 36,68 6,52 6,20" fill="rgba(255,214,0,0.08)" stroke="url(#hexGrad)" stroke-width="2" filter="url(#glow)"/> <polygon points="36,14 58,26 58,46 36,58 14,46 14,26" fill="none" stroke="rgba(255,214,0,0.28)" stroke-width="1"/> <text x="36" y="46" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#hexGrad)" text-anchor="middle" filter="url(#glow)">L</text> </svg> <div style="font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:rgba(255,214,0,0.5); margin-top:6px;">LENOVO LEGION</div> </div> <div class="hero-eyebrow" id="heroEyebrow"></div> <div class="hero-model glitch" data-text="Lenovo Legion 5">Lenovo Legion 5</div> <div class="hero-sub">15ACH6H · Complete Hardware Reference</div> <div class="hero-tags"> <span class="hero-tag cpu">Ryzen 7 5800H · Zen 3</span> <span class="hero-tag gpu">RTX 3060 · 130W · 6GB</span> <span class="hero-tag display">165Hz FHD · Dolby Vision</span> <span class="hero-tag os">⚡ CachyOS KDE</span> <span class="hero-tag year">2021 · AMD Advantage</span> </div> <div class="hero-model-id">Model: 82JU · BIOS: GKCN58WW / GKCN57WW</div>
 </div> 
