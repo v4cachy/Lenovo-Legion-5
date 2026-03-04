@@ -9,7 +9,7 @@
 ╚══════╝╚══════╝ ╚═════╝ ╚═╝ ╚═════╝ ╚═╝  ╚══╝
 ```
 
-# 🔥 LENOVO LEGION 5 · 15ACH6H · DEVICE BIBLE 🔥
+# 🔥 LENOVO LEGION 5 · 15ACH6H · DEVICE SPEC 🔥
 ### *The most unnecessarily detailed spec page ever made for a gaming laptop*
 
 [![CachyOS](https://img.shields.io/badge/OS-CachyOS%20KDE-00e5ff?style=for-the-badge&logo=linux&logoColor=black)](https://cachyos.org)
