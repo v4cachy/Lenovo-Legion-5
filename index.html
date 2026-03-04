@@ -930,54 +930,13 @@ document.addEventListener('touchstart', autoStart);</script> <div id="clickHint"
 <div class="hero"> <div class="hud-corner tl"></div> <div class="hud-corner tr"></div> <div class="hud-corner bl"></div> <div class="hud-corner br"></div> <div class="data-stream" style="left:10%;animation-duration:6s;animation-delay:0s;"></div> <div class="data-stream" style="left:25%;animation-duration:9s;animation-delay:2s;"></div> <div class="data-stream" style="left:50%;animation-duration:7s;animation-delay:1s;"></div> <div class="data-stream" style="left:72%;animation-duration:11s;animation-delay:3s;"></div> <div class="data-stream" style="left:88%;animation-duration:8s;animation-delay:0.5s;"></div>  <div style="margin-bottom:24px; position:relative; z-index:1;"> <svg class="logo-hex" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"> <defs> <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" style="stop-color:#FFD600;stop-opacity:1"/> <stop offset="100%" style="stop-color:#CC8800;stop-opacity:1"/> </linearGradient> <filter id="glow"> <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/> <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge> </filter> </defs> <polygon points="36,4 66,20 66,52 36,68 6,52 6,20" fill="rgba(255,214,0,0.08)" stroke="url(#hexGrad)" stroke-width="2" filter="url(#glow)"/> <polygon points="36,14 58,26 58,46 36,58 14,46 14,26" fill="none" stroke="rgba(255,214,0,0.28)" stroke-width="1"/> <text x="36" y="46" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#hexGrad)" text-anchor="middle" filter="url(#glow)">L</text> </svg> <div style="font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:rgba(255,214,0,0.5); margin-top:6px;">LENOVO LEGION</div> </div> <div class="hero-eyebrow" id="heroEyebrow"></div> <div class="hero-model glitch" data-text="Lenovo Legion 5">Lenovo Legion 5</div> <div class="hero-sub">15ACH6H · Complete Hardware Reference</div> <div class="hero-tags"> <span class="hero-tag cpu">Ryzen 7 5800H · Zen 3</span> <span class="hero-tag gpu">RTX 3060 · 130W · 6GB</span> <span class="hero-tag display">165Hz FHD · Dolby Vision</span> <span class="hero-tag os">⚡ CachyOS KDE</span> <span class="hero-tag year">2021 · AMD Advantage</span> </div> <div class="hero-model-id">Model: 82JU · BIOS: GKCN58WW / GKCN57WW</div>
 </div> 
 <style>
-/* nav-wrapper is now just a width-limiter, no flex fighting */
-.nav-wrapper { position: relative; max-width: 1120px; margin: 0 auto; }
-.nav-inner {
-  max-width: calc(100% - 110px);
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding: 10px 0;
-}
+.nav-wrapper { max-width: 1120px; margin: 0 auto; }
+.nav-inner { overflow-x: auto; scrollbar-width: none; padding: 10px 0; display: flex; gap: 4px; }
 .nav-inner::-webkit-scrollbar { display: none; }
-
-/* Status badge: absolutely pinned to right of sticky-nav */
-.status-badge {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex; align-items: center; gap: 7px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--green);
-  background: rgba(57,255,20,0.06);
-  border: 1px solid rgba(57,255,20,0.22);
-  padding: 5px 12px;
-  white-space: nowrap;
-  user-select: none;
-  z-index: 10;
-  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
-}
-.status-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-  animation: statusPulse 2.2s ease-in-out infinite;
-  flex-shrink: 0;
-}
-@keyframes statusPulse {
-  0%,100% { box-shadow: 0 0 4px rgba(57,255,20,0.6); opacity: 1; }
-  50%      { box-shadow: 0 0 14px rgba(57,255,20,1), 0 0 24px rgba(57,255,20,0.4); opacity: 0.85; }
-}
-@media(max-width:600px) { .status-badge span.status-text { display: none; } .nav-inner { max-width: calc(100% - 60px); } }
 </style>
 <div class="sticky-nav" id="stickyNav">
 <div class="nav-wrapper">
 <div class="nav-inner"> <button class="nav-btn active" data-target="all">All</button> <button class="nav-btn" data-target="overview">Overview</button> <button class="nav-btn" data-target="cpu">CPU</button> <button class="nav-btn" data-target="gpu">GPU</button> <button class="nav-btn" data-target="display">Display</button> <button class="nav-btn" data-target="platform">Platform</button> <button class="nav-btn" data-target="cachyos">CachyOS</button> <button class="nav-btn" data-target="gaming">Gaming on Linux</button> <button class="nav-btn" data-target="gpu-modes">GPU Modes</button> <button class="nav-btn" data-target="fancurve">Fan Curves</button> <button class="nav-btn" data-target="battery">Battery</button> <button class="nav-btn" data-target="tips">Tips & Commands</button> <button class="nav-btn nav-btn-icon" data-target="setup-guide" title="Setup Guide">⚡<span class="nav-icon-tooltip">POST-INSTALL SETUP GUIDE</span></button> </div>
-<div class="status-badge">
-  <span class="status-dot"></span>
-  <span class="status-text">Online</span>
-</div>
 </div>
 </div> <div class="container"> 
 <div class="section" data-section="overview"> <div class="section-title">Machine Overview</div> <div class="section-desc">Your full machine at a glance — official model, chassis, and key specifications confirmed from Lenovo PSREF.</div> <div class="spec-grid"> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:#FF6B6B"></span> <h4>Identity</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">Product Line</span><span class="v">Lenovo Legion 5</span></div> <div class="spec-row"><span class="k">Full Model Name</span><span class="v">Legion 5 15ACH6H</span></div> <div class="spec-row"><span class="k">Machine Type</span><span class="v">82JU</span></div> <div class="spec-row"><span class="k">Generation</span><span class="v">Gen 6 (2021)</span></div> <div class="spec-row"><span class="k">Chassis Size</span><span class="v">15.6" — Plastic chassis</span></div> <div class="spec-row"><span class="k">Dimensions</span><span class="v">363 × 260 × 22.5–24.6 mm</span></div> <div class="spec-row"><span class="k">Weight</span><span class="v">~2.4 kg (5.29 lbs)</span></div> <div class="spec-row"><span class="k">BIOS Versions</span><span class="v">GKCN58WW · GKCN57WW</span></div> <div class="spec-row"><span class="k">Operating System</span><span class="v"><span class="tag-yellow">CachyOS KDE</span></span></div> </div> </div> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:var(--accent)"></span> <h4>Key Components at a Glance</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">CPU</span><span class="v">AMD Ryzen 7 5800H — 8C/16T · 4.4 GHz</span></div> <div class="spec-row"><span class="k">dGPU</span><span class="v">NVIDIA GeForce RTX 3060 Laptop 130W</span></div> <div class="spec-row"><span class="k">iGPU</span><span class="v">AMD Radeon Vega 8 (integrated)</span></div> <div class="spec-row"><span class="k">RAM</span><span class="v">16 GB DDR4-3200 · 2× SO-DIMM · max 32 GB</span></div> <div class="spec-row"><span class="k">Storage</span><span class="v">M.2 2280 NVMe PCIe 3.0×4 (1 slot)</span></div> <div class="spec-row"><span class="k">Display</span><span class="v">15.6" FHD 165Hz IPS · Dolby Vision · DC Dimm</span></div> <div class="spec-row"><span class="k">Battery</span><span class="v">80 Wh · 300W charger (RTX 3060 model)</span></div> <div class="spec-row"><span class="k">Wi-Fi</span><span class="v">Wi-Fi 6 (802.11ax) · 2×2 · BT 5.1</span></div> </div> </div> </div>
