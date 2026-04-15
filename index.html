@@ -92,8 +92,631 @@ if (ticker) {
 ticker.addEventListener('mouseenter', () => ticker.style.borderBottomColor = 'var(--cp-red)');
 ticker.addEventListener('mouseleave', () => ticker.style.borderBottomColor = 'rgba(255,214,0,0.35)');
 }</script>
+<style>
+/* ══════════════════════════════════════════════
+   THEMES
+══════════════════════════════════════════════ */
+[data-theme="tokyo-night"]{--bg:#1a1b2e;--bg2:#16213e;--bg3:#0d1730;--bg4:#0a1225;--text:#c0caf5;--muted:#565f89;--accent:#7aa2f7;--accent2:#ff79c6;--gold:#e0af68;--green:#9ece6a;--red:#f7768e;--orange:#ff9e64;--border:#292e42;--border2:#3b4261;--cp-yellow:#7aa2f7;--cp-red:#ff79c6;--cp-cyan:#2ac3de;--jp-ink:#c0caf5}
+[data-theme="matcha"]{--bg:#111a0f;--bg2:#172013;--bg3:#1d2818;--bg4:#23301d;--text:#d4e8c2;--muted:#6b8c6b;--accent:#5a9e6b;--accent2:#c8d96f;--gold:#a3c97a;--green:#73b56a;--red:#e05b4b;--orange:#d4a849;--border:#243120;--border2:#2e3d26;--cp-yellow:#5a9e6b;--cp-red:#c8d96f;--cp-cyan:#73b56a;--jp-ink:#d4e8c2}
+[data-theme="nord"]{--bg:#2e3440;--bg2:#3b4252;--bg3:#434c5e;--bg4:#4c566a;--text:#d8dee9;--muted:#616e7e;--accent:#88c0d0;--accent2:#5e81ac;--gold:#ebcb8b;--green:#a3be8c;--red:#bf616a;--orange:#d08770;--border:#3b4252;--border2:#434c5e;--cp-yellow:#88c0d0;--cp-red:#bf616a;--cp-cyan:#8fbcbb;--jp-ink:#d8dee9}
+[data-theme="ocean"]{--bg:#060e1a;--bg2:#0a1628;--bg3:#0d1f3c;--bg4:#102847;--text:#c8e6ff;--muted:#4a7fa5;--accent:#00b4d8;--accent2:#0077b6;--gold:#ffd166;--green:#48cae4;--red:#e63946;--orange:#f4a261;--border:#142240;--border2:#1a3156;--cp-yellow:#00b4d8;--cp-red:#0077b6;--cp-cyan:#90e0ef;--jp-ink:#c8e6ff}
+[data-theme="forest"]{--bg:#0a1a0a;--bg2:#0e2210;--bg3:#122915;--bg4:#173218;--text:#d1e8c8;--muted:#547854;--accent:#52b788;--accent2:#1b4332;--gold:#d4a017;--green:#74c69d;--red:#c1440e;--orange:#d4804f;--border:#1c3820;--border2:#254c2a;--cp-yellow:#52b788;--cp-red:#d4a017;--cp-cyan:#74c69d;--jp-ink:#d1e8c8}
+
+/* Generic theme overrides (apply to all non-cyberpunk themes) */
+[data-theme] body{background-color:var(--bg) !important}
+[data-theme] .spec-card,[data-theme] .content-card,[data-theme] .gpu-mode-card,[data-theme] .fc-card{background:var(--bg2) !important;border-color:var(--border) !important}
+[data-theme] .spec-card:hover,[data-theme] .content-card:hover,[data-theme] .gpu-mode-card:hover,[data-theme] .fc-card:hover{border-color:var(--accent) !important;box-shadow:0 0 24px rgba(0,0,0,0.4) !important}
+[data-theme] .spec-card-header{background:var(--bg3) !important;border-bottom-color:var(--border2) !important}
+[data-theme] .spec-row{border-bottom-color:var(--border) !important}
+[data-theme] .spec-row .k{color:var(--muted) !important}
+[data-theme] .section{border-bottom-color:var(--border) !important}
+[data-theme] .nav-btn{border-color:var(--border2) !important;color:var(--muted) !important}
+[data-theme] .nav-btn.active{background:rgba(255,255,255,0.08) !important;border-color:var(--accent) !important;color:var(--accent) !important}
+[data-theme] code{color:var(--accent) !important}
+[data-theme] .section-title{color:var(--text) !important}
+[data-theme] .section-title::before{background:linear-gradient(to bottom,var(--accent),var(--accent2)) !important}
+[data-theme] .tip-item{background:var(--bg2) !important;border-color:var(--border) !important}
+[data-theme] .info-box.cyan{border-left-color:var(--accent) !important}
+[data-theme] #cp-ticker{border-bottom-color:rgba(var(--accent),0.35) !important}
+[data-theme] .hero{border-bottom-color:var(--accent) !important}
+[data-theme] .sticky-nav{border-bottom-color:var(--accent) !important}
+[data-theme] .hero-model{background:linear-gradient(135deg,var(--text) 0%,var(--accent) 55%,var(--accent2) 100%) !important;-webkit-background-clip:text !important;background-clip:text !important;-webkit-text-fill-color:transparent !important}
+[data-theme] #scrollFill{background:linear-gradient(90deg,var(--accent2),var(--accent)) !important}
+[data-theme] .footer{border-top-color:var(--accent) !important}
+[data-theme] ::-webkit-scrollbar-thumb{background:var(--accent) !important}
+[data-theme] ::selection{background:var(--accent) !important;color:var(--bg) !important}
+
+/* Boot color is set dynamically via JS */
+
+/* ══════════════════════════════════════════════
+   WELCOME SCREEN
+══════════════════════════════════════════════ */
+#welcomeOverlay{
+  position:fixed;inset:0;z-index:99999;
+  background:#03030A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;
+  transition:opacity 0.7s ease;
+}
+#welcomeOverlay.fading{opacity:0;pointer-events:none}
+#welcomeOverlay::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,214,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,214,0,0.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;
+}
+#welcomeOverlay::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);
+  pointer-events:none;
+}
+#wlCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#wlTopBar{
+  position:absolute;top:18px;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;z-index:2;
+}
+#wlThemePicker{display:flex;align-items:center;gap:6px;background:rgba(3,3,10,0.85);border:1px solid rgba(255,214,0,0.2);border-radius:4px;padding:8px 14px;backdrop-filter:blur(16px)}
+.wlt-label{font-size:9px;letter-spacing:3px;color:rgba(255,214,0,0.4);margin-right:4px}
+.wlt-btn{width:30px;height:30px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.2s;line-height:1}
+.wlt-btn:hover{border-color:var(--cp-yellow,#FFD600);transform:scale(1.1)}
+.wlt-btn.active{border-color:#FFD600;box-shadow:0 0 10px rgba(255,214,0,0.4);background:rgba(255,214,0,0.1)}
+.wlt-tip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#03030A;border:1px solid rgba(255,214,0,0.3);color:rgba(255,214,0,0.9);font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;white-space:nowrap;padding:4px 8px;pointer-events:none;z-index:10}
+.wlt-btn:hover .wlt-tip{display:block}
+#wlGithub{display:flex;align-items:center;gap:9px;padding:9px 16px;background:rgba(3,3,10,0.85);border:1px solid rgba(255,214,0,0.3);border-radius:4px;text-decoration:none;color:rgba(255,214,0,0.8);font-size:11px;letter-spacing:2px;text-transform:uppercase;backdrop-filter:blur(16px);transition:all 0.2s;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)}
+#wlGithub:hover{border-color:rgba(255,214,0,0.7);color:#FFD600;box-shadow:0 0 16px rgba(255,214,0,0.2)}
+#wlContent{position:relative;z-index:1;text-align:center;max-width:680px;padding:20px}
+.wl-brand{font-size:10px;letter-spacing:6px;color:rgba(255,214,0,0.45);margin-top:8px;animation:wlUp 0.8s ease 0.3s both}
+.wl-model{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,9vw,90px);line-height:0.88;letter-spacing:3px;background:linear-gradient(135deg,#EDE0C4 0%,#FFD600 55%,#FF003C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(255,214,0,0.3));animation:wlUp 0.9s ease 0.4s both;margin-bottom:4px}
+.wl-model small{font-size:50%;letter-spacing:6px;opacity:0.65}
+.wl-sub{font-size:11px;letter-spacing:5px;color:rgba(255,214,0,0.4);margin-bottom:38px;animation:wlUp 0.9s ease 0.55s both}
+.wl-os-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:30px;animation:wlUp 0.9s ease 0.65s both}
+.wl-btn{background:rgba(7,7,15,0.9);border:1px solid rgba(255,214,0,0.2);cursor:pointer;padding:30px 24px;text-align:center;transition:all 0.25s ease;clip-path:polygon(0 0,calc(100%-18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100%-18px));position:relative;overflow:hidden;backdrop-filter:blur(16px)}
+.wl-btn:hover{transform:translateY(-5px)}
+.wl-btn-cachyos:hover{border-color:rgba(255,214,0,0.6);box-shadow:0 0 40px rgba(255,214,0,0.14)}
+.wl-btn-windows:hover{border-color:rgba(0,120,215,0.6);box-shadow:0 0 40px rgba(0,120,215,0.15)}
+.wl-btn-windows{border-color:rgba(0,120,215,0.3)}
+.wl-btn-hud{position:absolute;width:12px;height:12px;pointer-events:none}
+.wl-btn-hud.tl{top:8px;left:8px;border-top:2px solid rgba(255,214,0,0.4);border-left:2px solid rgba(255,214,0,0.4)}
+.wl-btn-hud.br{bottom:8px;right:8px;border-bottom:2px solid rgba(255,214,0,0.4);border-right:2px solid rgba(255,214,0,0.4)}
+.wl-btn-windows .wl-btn-hud{border-color:rgba(0,120,215,0.4)!important}
+.wl-os-icon{font-size:46px;display:block;margin-bottom:12px;filter:drop-shadow(0 0 10px rgba(255,214,0,0.3))}
+.wl-btn-windows .wl-os-icon{filter:drop-shadow(0 0 10px rgba(0,120,215,0.4))}
+.wl-os-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#EDE0C4;margin-bottom:6px}
+.wl-os-sub{font-size:10px;letter-spacing:2px;color:rgba(255,214,0,0.4);line-height:1.6}
+.wl-btn-windows .wl-os-sub{color:rgba(100,160,255,0.5)}
+.wl-hw{font-size:9px;letter-spacing:2px;color:rgba(255,214,0,0.18);animation:wlUp 0.9s ease 0.8s both}
+@keyframes wlUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wlLogoIn{from{opacity:0;transform:scale(0.75);filter:blur(8px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+.wl-logo-wrap{margin-bottom:18px;animation:wlLogoIn 1s ease 0.1s both}
+
+/* ══════════════════════════════════════════════
+   BOOT SCREEN
+══════════════════════════════════════════════ */
+#bootScreen{
+  position:fixed;inset:0;z-index:99998;
+  background:#03030A;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+}
+#bootScreen::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.1) 3px,rgba(0,0,0,0.1) 4px);pointer-events:none}
+.boot-wrap{position:relative;z-index:1;width:min(520px,88vw);padding:0 20px}
+.boot-os-eyebrow{font-size:9px;letter-spacing:4px;color:rgba(255,214,0,0.35);margin-bottom:8px}
+.boot-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:5px;color:#FFD600;margin-bottom:26px;filter:drop-shadow(0 0 14px rgba(255,214,0,0.5))}
+.boot-bar-track{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:22px;overflow:hidden}
+.boot-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#FF003C,#FFD600);border-radius:2px;box-shadow:0 0 8px rgba(255,214,0,0.6);transition:width 0.28s ease}
+.boot-log{min-height:150px;font-size:11px;line-height:2.1;color:rgba(255,214,0,0.55);letter-spacing:1px}
+.bl{display:flex;align-items:center;gap:10px;animation:blIn 0.18s ease both}
+.bl::before{content:'▸';color:rgba(255,214,0,0.35);font-size:9px;flex-shrink:0}
+.bl.ok{color:rgba(57,255,20,0.75)}
+.bl.ok::after{content:' [OK]';color:#39FF14;opacity:0.8}
+.bl.info{color:rgba(255,214,0,0.65)}
+@keyframes blIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══════════════════════════════════════════════
+   WINDOWS PAGE  
+══════════════════════════════════════════════ */
+#windowsPage{display:none;background:var(--bg,#03030A);min-height:100vh;color:var(--text,#EDE0C4)}
+.wp-back{cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:9px 18px;background:rgba(0,120,215,0.08);border:1px solid rgba(0,120,215,0.4);color:#64a0ff;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all 0.2s}
+.wp-back:hover{background:rgba(0,120,215,0.15);border-color:rgba(0,120,215,0.7)}
+.wp-hero{padding:66px 40px 54px;text-align:center;border-bottom:2px solid rgba(0,120,215,0.35);position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(0,25,60,0.5) 0%,transparent 100%)}
+.wp-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(0,120,215,0.1) 0%,transparent 70%);pointer-events:none}
+.wp-hero::after{content:'⊞';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(160px,35vw,320px);color:transparent;-webkit-text-stroke:1px rgba(0,120,215,0.04);pointer-events:none;z-index:0;line-height:1}
+.wp-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:rgba(0,120,215,0.8);margin-bottom:18px;position:relative;z-index:1}
+.wp-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,9vw,90px);line-height:0.88;letter-spacing:3px;background:linear-gradient(135deg,#EDE0C4 0%,#64a0ff 55%,#0078d7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 22px rgba(0,120,215,0.3));position:relative;z-index:1;margin-bottom:6px}
+.wp-sub{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,3vw,30px);letter-spacing:4px;color:rgba(180,210,255,0.45);margin-bottom:24px;position:relative;z-index:1}
+.wp-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;position:relative;z-index:1;margin-bottom:20px}
+.wp-tag{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:2px;border:1px solid}
+.wp-tag.blue{color:#64a0ff;border-color:rgba(100,160,255,0.35);background:rgba(100,160,255,0.07)}
+.wp-tag.green{color:#6fcf6f;border-color:rgba(111,207,111,0.35);background:rgba(111,207,111,0.07)}
+.wp-tag.purple{color:#bb9af7;border-color:rgba(187,154,247,0.35);background:rgba(187,154,247,0.07)}
+.wp-tag.gray{color:rgba(200,220,255,0.4);border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.04)}
+.wp-model-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(180,210,255,0.25);letter-spacing:2px;position:relative;z-index:1;margin-top:4px}
+/* Windows nav */
+.wp-nav{position:sticky;top:0;z-index:200;background:rgba(3,6,16,0.97);backdrop-filter:blur(16px);border-bottom:2px solid rgba(0,120,215,0.3);padding:0 24px}
+.wp-nav-inner{max-width:1120px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.wp-nav-inner::-webkit-scrollbar{display:none}
+.wp-nb{flex-shrink:0;background:transparent;border:1px solid rgba(0,120,215,0.2);border-radius:3px;color:rgba(100,160,255,0.6);font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.wp-nb:hover{border-color:rgba(0,120,215,0.5);color:#64a0ff}
+.wp-nb.active{background:rgba(0,120,215,0.12);border-color:rgba(0,120,215,0.6);color:#64a0ff}
+/* Sections */
+.wp-sec{padding:50px 0 36px;border-bottom:1px solid rgba(0,120,215,0.12);scroll-margin-top:62px}
+.wp-sec-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;margin-bottom:8px;display:flex;align-items:center;gap:14px;color:#EDE0C4}
+.wp-sec-title::before{content:'';width:3px;height:28px;background:linear-gradient(to bottom,#0078d7,#64a0ff);border-radius:2px;flex-shrink:0}
+.wp-sec-desc{font-size:13px;color:rgba(180,210,255,0.5);line-height:1.7;margin-bottom:24px;max-width:780px;border-left:2px solid rgba(0,120,215,0.2);padding-left:14px;font-style:italic}
+/* Cards */
+.wp-card{background:rgba(0,12,35,0.7);border:1px solid rgba(0,120,215,0.18);border-radius:6px;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s}
+.wp-card:hover{border-color:rgba(0,120,215,0.5);box-shadow:0 0 24px rgba(0,120,215,0.1);transform:translateY(-3px)}
+.wp-card-hdr{padding:12px 20px;border-bottom:1px solid rgba(0,120,215,0.12);background:rgba(0,120,215,0.04);display:flex;align-items:center;gap:10px}
+.wp-card-hdr .wd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.wp-card-hdr h4{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(100,160,255,0.6)}
+.wp-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 20px;border-bottom:1px solid rgba(0,120,215,0.08);font-size:12.5px;gap:12px}
+.wp-row:last-child{border-bottom:none}
+.wp-row .wk{color:rgba(180,210,255,0.45);flex-shrink:0;min-width:150px;font-size:11.5px}
+.wp-row .wv{font-weight:600;text-align:right;line-height:1.5}
+/* Info boxes */
+.wp-box{border-radius:5px;padding:16px 20px;font-size:13px;line-height:1.75;margin-top:14px}
+.wp-box.blue{background:rgba(0,120,215,0.05);border:1px solid rgba(0,120,215,0.2);border-left:3px solid #0078d7}
+.wp-box.green{background:rgba(40,180,80,0.05);border:1px solid rgba(40,180,80,0.2);border-left:3px solid #28b450}
+.wp-box.yellow{background:rgba(255,193,7,0.05);border:1px solid rgba(255,193,7,0.2);border-left:3px solid #ffc107}
+.wp-box.purple{background:rgba(111,66,193,0.05);border:1px solid rgba(111,66,193,0.2);border-left:3px solid #6f42c1}
+.wp-box code{font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#64a0ff;background:rgba(0,120,215,0.1);padding:1px 6px;border-radius:3px}
+.wp-box strong{color:#EDE0C4}
+/* Comparison table */
+.wp-vs-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+.wp-vs-table thead tr{border-bottom:2px solid rgba(0,120,215,0.2)}
+.wp-vs-table th{padding:11px 14px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(100,160,255,0.5);text-align:left}
+.wp-vs-table td{padding:11px 14px;border-bottom:1px solid rgba(0,120,215,0.08);font-size:12.5px;vertical-align:top;line-height:1.6;color:rgba(200,220,255,0.7)}
+.wp-vs-table tr:hover td{background:rgba(0,120,215,0.04)}
+.wp-vs-table td.feat{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:#EDE0C4;white-space:nowrap;width:20%}
+.wp-vs-table td.win-col{border-left:1px solid rgba(0,120,215,0.1)}
+/* Tip list */
+.wp-tips{display:flex;flex-direction:column;gap:12px}
+.wp-tip{display:flex;gap:14px;background:rgba(0,12,35,0.7);border:1px solid rgba(0,120,215,0.18);border-radius:6px;padding:16px 20px;font-size:13px;line-height:1.65;transition:all 0.3s}
+.wp-tip:hover{border-color:rgba(0,120,215,0.45);transform:translateY(-2px)}
+.wp-tip-icon{width:30px;height:30px;border-radius:4px;background:rgba(0,120,215,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.wp-tip strong{display:block;font-size:13.5px;font-weight:700;margin-bottom:3px;color:#EDE0C4}
+.wp-tip .wsub{color:rgba(180,210,255,0.5);font-size:12.5px}
+.wp-tip code{font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#64a0ff;background:rgba(0,120,215,0.1);padding:1px 5px;border-radius:3px}
+/* Pill tags */
+.wp-pill{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:2px;border:1px solid;vertical-align:middle}
+.wp-pill.g{color:#6fcf6f;border-color:rgba(111,207,111,0.3);background:rgba(111,207,111,0.07)}
+.wp-pill.b{color:#64a0ff;border-color:rgba(100,160,255,0.3);background:rgba(100,160,255,0.07)}
+.wp-pill.y{color:#ffd166;border-color:rgba(255,209,102,0.3);background:rgba(255,209,102,0.07)}
+.wp-pill.r{color:#ff6b6b;border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.07)}
+.wp-pill.x{color:rgba(200,220,255,0.4);border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.04)}
+/* Step cards */
+.wp-step{background:rgba(0,12,35,0.7);border:1px solid rgba(0,120,215,0.18);border-radius:6px;overflow:hidden;margin-bottom:12px;transition:border-color 0.2s}
+.wp-step:hover{border-color:rgba(0,120,215,0.35)}
+.wp-step-hdr{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid rgba(0,120,215,0.12)}
+.wp-step-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#64a0ff;background:rgba(0,120,215,0.1);border:1px solid rgba(0,120,215,0.25);border-radius:2px;padding:2px 7px;flex-shrink:0}
+.wp-step-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#EDE0C4}
+.wp-step-badge{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px;flex-shrink:0}
+.wp-step-badge.req{color:#ff6b6b;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25)}
+.wp-step-badge.rec{color:#ffd166;background:rgba(255,209,102,0.08);border:1px solid rgba(255,209,102,0.25)}
+.wp-step-badge.opt{color:rgba(200,220,255,0.35);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1)}
+.wp-step-body{padding:16px 20px;font-size:13px;line-height:1.8;color:rgba(180,210,255,0.6)}
+.wp-step-body strong{color:#EDE0C4}
+.wp-step-body code{font-family:'JetBrains Mono',monospace;font-size:0.85em;color:#64a0ff;background:rgba(0,120,215,0.1);padding:1px 6px;border-radius:3px}
+.wp-cmd{background:rgba(0,3,12,0.85);border:1px solid rgba(0,120,215,0.18);border-left:3px solid #0078d7;border-radius:5px;padding:12px 16px;margin:10px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#64a0ff;line-height:2;overflow-x:auto}
+.wp-cl{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.wp-cl-item{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:rgba(180,210,255,0.6)}
+.wp-cl-item::before{content:'▸';color:#64a0ff;flex-shrink:0;margin-top:2px}
+.wp-cl-item.ok::before{content:'✓';color:#6fcf6f}
+/* Footer */
+.wp-footer{padding:32px 40px;text-align:center;font-size:11px;color:rgba(100,160,255,0.25);letter-spacing:1.5px;border-top:2px solid rgba(0,120,215,0.25);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase}
+
+/* In-site theme switcher */
+#sitethemebtn{position:fixed;bottom:134px;right:24px;z-index:9996;background:rgba(3,3,10,0.95);border:1px solid rgba(255,214,0,0.45);color:rgba(255,214,0,0.9);font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;padding:7px 12px;cursor:pointer;clip-path:polygon(4px 0%,100% 0%,calc(100%-4px) 100%,0% 100%);backdrop-filter:blur(16px);display:none;transition:all 0.2s}
+#sitethemebtn:hover{box-shadow:0 0 14px rgba(255,214,0,0.3)}
+#sitethemepanel{display:none;position:fixed;bottom:168px;right:24px;z-index:9996;background:rgba(3,3,10,0.97);border:1px solid rgba(255,214,0,0.2);padding:14px;backdrop-filter:blur(16px);clip-path:polygon(0 0,calc(100%-10px) 0,100% 10px,100% 100%,0 100%);min-width:190px}
+.stp-title{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:3px;color:rgba(255,214,0,0.4);margin-bottom:10px;border-bottom:1px solid rgba(255,214,0,0.1);padding-bottom:6px}
+.stp-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.stp-it{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:8px 6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.55);text-align:center;transition:all 0.2s;border-radius:2px}
+.stp-it:hover,.stp-it.on{border-color:rgba(255,214,0,0.4);color:#FFD600;background:rgba(255,214,0,0.05)}
+.stp-it .stp-icon{font-size:16px;display:block;margin-bottom:3px}
+
+/* Nav OS switch button */
+.nav-btn-os{flex-shrink:0;background:rgba(0,120,215,0.07) !important;border:1px solid rgba(0,120,215,0.35) !important;border-radius:3px;color:#64a0ff !important;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.nav-btn-os:hover{background:rgba(0,120,215,0.15) !important;border-color:rgba(0,120,215,0.7) !important}
+
+@media(max-width:768px){.wl-os-grid{grid-template-columns:1fr}.wp-hero{padding:50px 20px 40px}#wlTopBar{flex-direction:column;gap:10px;top:10px}.spec-grid.two{grid-template-columns:1fr}}
+</style>
 </head>
-<body> <!-- ★ CP2077 JAPAN TICKER ★ -->
+<body>
+
+<!-- ══════════════════════ WELCOME OVERLAY ══════════════════════ -->
+<div id="welcomeOverlay">
+  <canvas id="wlCanvas"></canvas>
+  <div id="wlTopBar">
+    <div id="wlThemePicker">
+      <span class="wlt-label">THEME</span>
+      <button class="wlt-btn active" data-t="cyberpunk" onclick="pickTheme('cyberpunk')">⬡<span class="wlt-tip">CYBERPUNK</span></button>
+      <button class="wlt-btn" data-t="tokyo-night" onclick="pickTheme('tokyo-night')">🌆<span class="wlt-tip">TOKYO NIGHT</span></button>
+      <button class="wlt-btn" data-t="matcha" onclick="pickTheme('matcha')">🍵<span class="wlt-tip">MATCHA</span></button>
+      <button class="wlt-btn" data-t="nord" onclick="pickTheme('nord')">❄️<span class="wlt-tip">CACHYOS NORD</span></button>
+      <button class="wlt-btn" data-t="ocean" onclick="pickTheme('ocean')">🌊<span class="wlt-tip">OCEAN</span></button>
+      <button class="wlt-btn" data-t="forest" onclick="pickTheme('forest')">🌲<span class="wlt-tip">FOREST</span></button>
+    </div>
+    <a id="wlGithub" href="https://github.com/v4cachy/legion-linux-toolkit" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      LEGION LINUX TOOLKIT
+    </a>
+  </div>
+  <div id="wlContent">
+    <div class="wl-logo-wrap">
+      <svg width="78" height="78" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="wlG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FFD600"/><stop offset="100%" style="stop-color:#CC8800"/></linearGradient>
+          <filter id="wlGl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <polygon points="36,4 66,20 66,52 36,68 6,52 6,20" fill="rgba(255,214,0,0.07)" stroke="url(#wlG)" stroke-width="2" filter="url(#wlGl)"/>
+        <polygon points="36,14 58,26 58,46 36,58 14,46 14,26" fill="none" stroke="rgba(255,214,0,0.25)" stroke-width="1"/>
+        <text x="36" y="46" font-family="Arial Black,sans-serif" font-size="28" font-weight="900" fill="url(#wlG)" text-anchor="middle" filter="url(#wlGl)">L</text>
+      </svg>
+      <div class="wl-brand">LENOVO LEGION</div>
+    </div>
+    <div class="wl-model">LEGION 5 <small>15ACH6H</small></div>
+    <div class="wl-sub">SELECT YOUR OPERATING SYSTEM</div>
+    <div class="wl-os-grid">
+      <button class="wl-btn wl-btn-cachyos" onclick="bootInto('cachyos')">
+        <div class="wl-btn-hud tl"></div><div class="wl-btn-hud br"></div>
+        <span class="wl-os-icon">⚡</span>
+        <div class="wl-os-name">CACHYOS LINUX</div>
+        <div class="wl-os-sub">KDE Plasma 6 · BORE Kernel · RTX 3060<br>Proton · Fan Curves · x86-64-v3</div>
+      </button>
+      <button class="wl-btn wl-btn-windows" onclick="bootInto('windows')">
+        <div class="wl-btn-hud tl"></div><div class="wl-btn-hud br"></div>
+        <span class="wl-os-icon">🪟</span>
+        <div class="wl-os-name">WINDOWS 10 / 11</div>
+        <div class="wl-os-sub">Dolby Vision · Nahimic · Advanced Optimus<br>Lenovo Vantage · DirectX 12 · DLSS</div>
+      </button>
+    </div>
+    <div class="wl-hw">RYZEN 7 5800H · RTX 3060 130W · 165Hz FHD · 80WH · BIOS GKCN58WW</div>
+  </div>
+</div>
+
+<!-- ══════════════════════ BOOT SCREEN ══════════════════════ -->
+<div id="bootScreen">
+  <div class="boot-wrap">
+    <div class="boot-os-eyebrow">LEGION 5 15ACH6H · LOADING</div>
+    <div class="boot-title" id="bootTitle">BOOTING...</div>
+    <div class="boot-bar-track"><div class="boot-bar-fill" id="bootBar"></div></div>
+    <div class="boot-log" id="bootLog"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ WINDOWS PAGE ══════════════════════ -->
+<div id="windowsPage">
+
+<div class="wp-hero">
+  <div class="wp-eyebrow">⊞ WINDOWS REFERENCE GUIDE · LENOVO LEGION 5 15ACH6H</div>
+  <div class="wp-h1">WINDOWS 10 / 11</div>
+  <div class="wp-sub">COMPLETE HARDWARE &amp; SOFTWARE REFERENCE</div>
+  <div class="wp-tags">
+    <span class="wp-tag blue">⊞ Windows 10 / 11</span>
+    <span class="wp-tag green">DirectX 12 Ultimate</span>
+    <span class="wp-tag purple">Dolby Vision ✓</span>
+    <span class="wp-tag purple">Nahimic 3D ✓</span>
+    <span class="wp-tag blue">Advanced Optimus ✓</span>
+    <span class="wp-tag gray">DLSS 2.x · G-Sync</span>
+  </div>
+  <div class="wp-model-id">Model 82JU · BIOS GKCN58WW · Ryzen 7 5800H · RTX 3060 130W · 165Hz Dolby Vision</div>
+  <div style="margin-top:22px;position:relative;z-index:1">
+    <button class="wp-back" onclick="showWelcome()">← BACK TO OS SELECT</button>
+  </div>
+</div>
+
+<div class="wp-nav">
+  <div class="wp-nav-inner">
+    <button class="wp-nb active" data-ws="wp-overview">Overview</button>
+    <button class="wp-nb" data-ws="wp-drivers">Drivers</button>
+    <button class="wp-nb" data-ws="wp-vantage">Lenovo Vantage</button>
+    <button class="wp-nb" data-ws="wp-vs">Win vs Linux</button>
+    <button class="wp-nb" data-ws="wp-exclusive">Win Exclusives</button>
+    <button class="wp-nb" data-ws="wp-gaming">Gaming</button>
+    <button class="wp-nb" data-ws="wp-display">Display</button>
+    <button class="wp-nb" data-ws="wp-guide">Setup Guide</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- OVERVIEW -->
+<div class="wp-sec" id="wp-overview">
+  <div class="wp-sec-title">Machine Overview — Windows</div>
+  <div class="wp-sec-desc">Same hardware as your CachyOS setup, but with full Windows driver support and exclusive features like Dolby Vision, Advanced Optimus, and Nahimic 3D.</div>
+  <div class="spec-grid">
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#64a0ff"></span><h4>Key Specs</h4></div>
+      <div class="wp-row"><span class="wk">CPU</span><span class="wv">AMD Ryzen 7 5800H · 8C/16T · 4.4GHz · Zen 3</span></div>
+      <div class="wp-row"><span class="wk">GPU</span><span class="wv">NVIDIA GeForce RTX 3060 Laptop · 130W TGP</span></div>
+      <div class="wp-row"><span class="wk">RAM</span><span class="wv">16 GB DDR4-3200 · 2× SO-DIMM · max 32 GB</span></div>
+      <div class="wp-row"><span class="wk">Display</span><span class="wv">15.6″ FHD 165Hz IPS · Dolby Vision · DC Dimmer</span></div>
+      <div class="wp-row"><span class="wk">Storage</span><span class="wv">M.2 2280 NVMe PCIe 3.0×4 (1 slot)</span></div>
+      <div class="wp-row"><span class="wk">Wi-Fi</span><span class="wv">Intel AX200 · Wi-Fi 6 802.11ax · BT 5.1</span></div>
+      <div class="wp-row"><span class="wk">Battery</span><span class="wv">80 Wh · 4-cell · 300W barrel charger</span></div>
+      <div class="wp-row"><span class="wk">BIOS</span><span class="wv">GKCN58WW / GKCN57WW · Press F2 to enter</span></div>
+    </div>
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#6fcf6f"></span><h4>Windows-Exclusive Features on This Machine</h4></div>
+      <div class="wp-row"><span class="wk">Dolby Vision</span><span class="wv"><span class="wp-pill g">✓ FULL</span> True DV HDR pipeline — Netflix, Apple TV+</span></div>
+      <div class="wp-row"><span class="wk">Dolby Atmos</span><span class="wv"><span class="wp-pill g">✓ FULL</span> Headphone &amp; speaker spatial audio</span></div>
+      <div class="wp-row"><span class="wk">Nahimic 3D</span><span class="wv"><span class="wp-pill g">✓ FULL</span> System-wide speaker DSP + mic enhancement</span></div>
+      <div class="wp-row"><span class="wk">Advanced Optimus</span><span class="wv"><span class="wp-pill g">✓ FULL</span> MUX GPU switch — no reboot needed</span></div>
+      <div class="wp-row"><span class="wk">Lenovo Vantage</span><span class="wv"><span class="wp-pill g">✓ FULL</span> Fan curves · RGB · battery · power modes</span></div>
+      <div class="wp-row"><span class="wk">DLSS 2.x</span><span class="wv"><span class="wp-pill g">✓ NATIVE</span> Better than Proton implementation</span></div>
+      <div class="wp-row"><span class="wk">Auto HDR (Win 11)</span><span class="wv"><span class="wp-pill b">Win 11</span> Converts SDR games to HDR automatically</span></div>
+      <div class="wp-row"><span class="wk">Xbox Game Bar</span><span class="wv"><span class="wp-pill g">✓</span> Win+G overlay · FPS · capture · audio mixer</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVERS -->
+<div class="wp-sec" id="wp-drivers">
+  <div class="wp-sec-title">Driver Setup — Install Order Matters</div>
+  <div class="wp-sec-desc">Wrong install order can cause AMD/NVIDIA conflicts. Follow this exact sequence after a fresh Windows install.</div>
+  <div class="wp-tips">
+    <div class="wp-tip"><div class="wp-tip-icon">1️⃣</div><div>
+      <strong>AMD Chipset Drivers — First</strong>
+      <div class="wsub">Download from <code>amd.com/en/support</code> → Ryzen 5000 Series Mobile. Installs PCH, USB 3.x, NVMe, and power management. Must be done before NVIDIA. Reboot after.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">2️⃣</div><div>
+      <strong>NVIDIA Game Ready Driver — Second</strong>
+      <div class="wsub"><code>nvidia.com/Download/index.aspx</code> → RTX 3060 Laptop GPU. Run as <strong>Custom Install → Clean Installation</strong>. Game Ready Driver for gaming, Studio Driver for content creation + stability. Do NOT let Windows Update install this automatically.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">3️⃣</div><div>
+      <strong>Lenovo Driver Pack — Vantage + Hotkeys + Nahimic</strong>
+      <div class="wsub"><code>support.lenovo.com</code> → search "Legion 5 15ACH6H" → Drivers &amp; Software. Download and install: <strong>Lenovo Vantage</strong>, <strong>Lenovo Hotkeys</strong>, <strong>Nahimic Audio driver</strong>. These enable Fn+Q, RGB control, battery conservation, and Dolby Atmos.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">4️⃣</div><div>
+      <strong>Intel AX200 Wi-Fi Driver</strong>
+      <div class="wsub">Download Intel Wi-Fi 6 AX200 driver from <code>intel.com/content/www/us/en/download-center/home.html</code>. Intel's own package provides better Wi-Fi 6 performance and BT 5.1 audio quality than the generic Windows driver.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">5️⃣</div><div>
+      <strong>Windows Update — Run Last</strong>
+      <div class="wsub">Run Windows Update only after manually installing all drivers above. Check "Optional Updates" for remaining hardware updates. Running Windows Update first risks overwriting your manually installed NVIDIA/AMD drivers with older generic versions.</div>
+    </div></div>
+  </div>
+  <div class="wp-box blue" style="margin-top:16px">
+    <strong>💡 Resizable BAR:</strong> Same as Linux — BIOS F2 → Configuration → enable "Above 4G Decoding" + "Re-Size BAR Support". Verify in NVIDIA Control Panel → System Information → "Resizable BAR: Enabled". Gives 5–12% FPS in supported titles.
+  </div>
+</div>
+
+<!-- VANTAGE -->
+<div class="wp-sec" id="wp-vantage">
+  <div class="wp-sec-title">Lenovo Vantage — Hardware Control Center</div>
+  <div class="wp-sec-desc">The Windows equivalent of LenovoLegionLinux — controls fan curves, power modes, RGB, battery, and GPU modes with a polished GUI.</div>
+  <div class="spec-grid">
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#64a0ff"></span><h4>Vantage Features</h4></div>
+      <div class="wp-row"><span class="wk">Power Modes</span><span class="wv"><span class="wp-pill g">✓</span> Quiet · Balanced · Performance via Fn+Q or GUI</span></div>
+      <div class="wp-row"><span class="wk">Fan Curves</span><span class="wv"><span class="wp-pill g">✓</span> Custom curve editor per power mode</span></div>
+      <div class="wp-row"><span class="wk">Battery Limit</span><span class="wv"><span class="wp-pill g">✓</span> Conservation mode (60% cap) or custom threshold</span></div>
+      <div class="wp-row"><span class="wk">4-Zone RGB</span><span class="wv"><span class="wp-pill g">✓</span> Full per-zone color + effect (breath, wave, etc.)</span></div>
+      <div class="wp-row"><span class="wk">GPU Mode Switch</span><span class="wv"><span class="wp-pill g">✓</span> Discrete / Hybrid / iGPU — Advanced Optimus</span></div>
+      <div class="wp-row"><span class="wk">BIOS/Driver Updates</span><span class="wv"><span class="wp-pill g">✓</span> One-click updates via Vantage</span></div>
+      <div class="wp-row"><span class="wk">Thermal Sensors</span><span class="wv"><span class="wp-pill g">✓</span> Real-time CPU + GPU temp + fan RPM</span></div>
+    </div>
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#6fcf6f"></span><h4>Advanced Optimus — Windows Exclusive</h4></div>
+      <div class="wp-row"><span class="wk">What it does</span><span class="wv">Switch GPU mode without rebooting</span></div>
+      <div class="wp-row"><span class="wk">On CachyOS/Linux</span><span class="wv"><span class="wp-pill r">✗ Requires BIOS switch + reboot</span></span></div>
+      <div class="wp-row"><span class="wk">Battery workflow</span><span class="wv">Switch to iGPU mode for browsing — instantly</span></div>
+      <div class="wp-row"><span class="wk">Gaming workflow</span><span class="wv">Switch to Discrete mode before game launch</span></div>
+      <div class="wp-row"><span class="wk">How to use</span><span class="wv">Vantage → Power tab → GPU Mode</span></div>
+      <div class="wp-row"><span class="wk">Battery saving</span><span class="wv">+1–2 hrs by switching to Hybrid/iGPU instantly</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- WIN vs LINUX COMPARISON -->
+<div class="wp-sec" id="wp-vs">
+  <div class="wp-sec-title">Windows vs CachyOS Linux — Feature Comparison</div>
+  <div class="wp-sec-desc">Head-to-head comparison of what works on each OS for your specific Legion 5 15ACH6H hardware.</div>
+  <table class="wp-vs-table">
+    <thead><tr><th>Feature</th><th>⚡ CachyOS Linux</th><th class="win-col">🪟 Windows 10/11</th></tr></thead>
+    <tbody>
+      <tr><td class="feat">Dolby Vision HDR</td><td><span class="wp-pill r">✗ Not supported</span> No DV driver on Linux</td><td class="win-col"><span class="wp-pill g">✓ Full</span> Native DV on Netflix, Apple TV+, files</td></tr>
+      <tr><td class="feat">Nahimic / Dolby Atmos</td><td><span class="wp-pill r">✗ Windows only</span></td><td class="win-col"><span class="wp-pill g">✓ Full</span> System tray app, spatial audio headphones</td></tr>
+      <tr><td class="feat">Advanced Optimus</td><td><span class="wp-pill r">✗ BIOS switch + reboot</span></td><td class="win-col"><span class="wp-pill g">✓ No reboot needed</span></td></tr>
+      <tr><td class="feat">Fan Curve Control</td><td><span class="wp-pill g">✓ LenovoLegionLinux</span> 10-point EC curve, GUI</td><td class="win-col"><span class="wp-pill g">✓ Lenovo Vantage</span> Smooth GUI, presets</td></tr>
+      <tr><td class="feat">4-Zone RGB</td><td><span class="wp-pill g">✓ lenovolegionlinux AUR</span></td><td class="win-col"><span class="wp-pill g">✓ Lenovo Vantage</span></td></tr>
+      <tr><td class="feat">165Hz Display</td><td><span class="wp-pill g">✓ Auto-detected KDE</span></td><td class="win-col"><span class="wp-pill y">Manual — set in Display Settings</span></td></tr>
+      <tr><td class="feat">DLSS 2.x</td><td><span class="wp-pill y">⚠ Via Proton — slightly lower perf</span></td><td class="win-col"><span class="wp-pill g">✓ Native — best performance</span></td></tr>
+      <tr><td class="feat">FPS (Gaming)</td><td><span class="wp-pill y">⚠ 5–20% lower (API overhead)</span></td><td class="win-col"><span class="wp-pill g">✓ Native DX12 / max GPU perf</span></td></tr>
+      <tr><td class="feat">Anti-Cheat Games</td><td><span class="wp-pill r">✗ Valorant, R6 don't work</span></td><td class="win-col"><span class="wp-pill g">✓ All games work</span></td></tr>
+      <tr><td class="feat">G-Sync / VRR</td><td><span class="wp-pill y">⚠ KWin Wayland VRR toggle</span></td><td class="win-col"><span class="wp-pill g">✓ NVIDIA Control Panel, native</span></td></tr>
+      <tr><td class="feat">Battery Life</td><td><span class="wp-pill g">✓ Better — amd-pstate + TLP</span></td><td class="win-col"><span class="wp-pill y">Good — Advanced Optimus helps</span></td></tr>
+      <tr><td class="feat">Boot Speed</td><td><span class="wp-pill g">✓ Faster — ~8s cold boot</span></td><td class="win-col"><span class="wp-pill y">Slower — ~15–25s</span></td></tr>
+      <tr><td class="feat">Gaming Compatibility</td><td><span class="wp-pill y">⚠ Most Steam games via Proton</span></td><td class="win-col"><span class="wp-pill g">✓ All games, all launchers</span></td></tr>
+      <tr><td class="feat">Kernel Customization</td><td><span class="wp-pill g">✓ BORE, sched-ext, patches</span></td><td class="win-col"><span class="wp-pill r">✗ Fixed Windows kernel</span></td></tr>
+    </tbody>
+  </table>
+  <div class="wp-box blue">
+    <strong>💡 Summary:</strong> CachyOS wins on <strong>battery life, boot speed, customization, and privacy</strong>. Windows wins on <strong>gaming FPS, Dolby Vision, advanced audio, anti-cheat game support, and no-reboot GPU switching</strong>. Most users with this machine dual-boot — CachyOS for daily use and Linux gaming, Windows for competitive games or Dolby Vision content.
+  </div>
+</div>
+
+<!-- EXCLUSIVE FEATURES -->
+<div class="wp-sec" id="wp-exclusive">
+  <div class="wp-sec-title">Windows-Exclusive Features on This Machine</div>
+  <div class="wp-sec-desc">Features that either don't exist or are severely limited on Linux. Primary reasons to keep a Windows partition.</div>
+  <div class="wp-tips">
+    <div class="wp-tip"><div class="wp-tip-icon">🎨</div><div>
+      <strong>Dolby Vision — True HDR on Your Panel</strong>
+      <div class="wsub">Your 15ACH6H panel is Dolby Vision certified. On Windows, streaming services (Netflix via Edge, Apple TV+, Disney+) and supported video players render true Dolby Vision with the full certified brightness curve. Enable in Settings → Display → Use HDR → On. On Linux, this is impossible — no DV driver stack exists.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🔊</div><div>
+      <strong>Nahimic 3D Audio + Dolby Atmos Headphones</strong>
+      <div class="wsub">Nahimic installs with Lenovo's audio driver pack — open from system tray. Adds real-time EQ, bass boost, 3D surround, and mic noise cancellation system-wide including in games. For Dolby Atmos headphone spatial audio: install <strong>Dolby Access</strong> from Microsoft Store. Works with any 3.5mm headphone or Bluetooth device.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🔄</div><div>
+      <strong>Advanced Optimus — Reboot-Free GPU Switching</strong>
+      <div class="wsub">Open Lenovo Vantage → Power tab → GPU Mode. Switch between <strong>Discrete</strong> (RTX 3060 drives panel, max FPS), <strong>Hybrid</strong> (iGPU drives panel, better battery), and <strong>iGPU Only</strong> (RTX off, max battery) — without rebooting. This is a hardware MUX feature enabled by the NVIDIA driver on Windows only.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🎮</div><div>
+      <strong>Xbox Game Bar — Built-In Overlay</strong>
+      <div class="wsub">Press <strong>Win+G</strong> in any game. FPS counter, CPU/GPU performance graphs, screenshot and clip capture via NVENC (ShadowPlay-like "last N minutes" recording), audio mixer per-app, achievement tracker. No install needed — built into Windows 10 and 11. The equivalent of MangoHud + OBS on Linux, but out of the box.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">⚡</div><div>
+      <strong>Auto HDR (Windows 11)</strong>
+      <div class="wsub">Settings → System → Display → HDR → Auto HDR → On. Windows 11 automatically converts SDR games to HDR in real-time using AI upscaling. Works in hundreds of DX11/DX12 games with your 165Hz Dolby Vision panel. Zero config needed per-game — it just works. Not available on Linux.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- GAMING -->
+<div class="wp-sec" id="wp-gaming">
+  <div class="wp-sec-title">Gaming on Windows — RTX 3060 Optimization</div>
+  <div class="wp-sec-desc">Key tweaks to get maximum performance from your RTX 3060 130W on Windows. Do these after driver install.</div>
+  <div class="wp-tips">
+    <div class="wp-tip"><div class="wp-tip-icon">⚙️</div><div>
+      <strong>Enable Hardware-Accelerated GPU Scheduling (HAGS)</strong>
+      <div class="wsub">Settings → System → Display → Graphics Settings → "Hardware-accelerated GPU scheduling" → On → Restart. Reduces CPU-to-GPU latency for more consistent frametimes. Recommended for all RTX 30-series systems.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🎯</div><div>
+      <strong>NVIDIA Control Panel — Key Settings</strong>
+      <div class="wsub">Right-click desktop → NVIDIA Control Panel → Manage 3D Settings: <strong>Power Management Mode → Prefer Maximum Performance</strong>. <strong>Low Latency Mode → Ultra</strong> (for competitive games). <strong>Texture Filtering → High Performance</strong>. Set up G-SYNC: Display tab → Enable G-SYNC for fullscreen + windowed.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🔥</div><div>
+      <strong>Switch to Performance Mode Before Gaming</strong>
+      <div class="wsub"><strong>Fn+Q</strong> to cycle to Performance mode (LED changes color). In Vantage: switch to Discrete GPU mode. This unlocks the full RTX 3060 130W TGP + CPU 54W TDP. For competitive play: also set Windows power plan to "Ultimate Performance" (enable via <code>powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61</code>).</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">📊</div><div>
+      <strong>MSI Afterburner + RivaTuner for Monitoring</strong>
+      <div class="wsub">MSI Afterburner (free) + RivaTuner Statistics Server: the Windows equivalent of MangoHud. Detailed in-game overlay showing FPS, GPU core/memory clock, GPU temp, power draw, VRAM usage, frametime graph. Essential for tuning your RTX 3060 settings per-game.</div>
+    </div></div>
+    <div class="wp-tip"><div class="wp-tip-icon">🚀</div><div>
+      <strong>NVIDIA Reflex — Low Latency in Competitive Games</strong>
+      <div class="wsub">Enable NVIDIA Reflex in supported games (CS2, Valorant, Apex, Fortnite, Overwatch 2). In-game setting → NVIDIA Reflex Low Latency: "Enabled + Boost". Measurably reduces click-to-pixel latency — especially noticeable on your 165Hz display. Works on RTX 3060.</div>
+    </div></div>
+  </div>
+  <div class="wp-box purple" style="margin-top:16px">
+    <strong>🎯 Windows vs Linux FPS on Your RTX 3060:</strong> Expect 5–20% higher FPS on Windows for most titles. Vulkan-native games are closest to parity. DX12 games show the biggest Windows advantage (~15%) due to native NVIDIA DX12 implementation vs VKD3D-Proton translation. Competitive games (Valorant, CS2, Apex) also benefit from Windows' tighter NVIDIA driver integration and lower system overhead.
+  </div>
+</div>
+
+<!-- DISPLAY -->
+<div class="wp-sec" id="wp-display">
+  <div class="wp-sec-title">Display — 165Hz + Dolby Vision + G-Sync</div>
+  <div class="wp-sec-desc">Your 165Hz panel is fully unlocked on Windows. Here's how to configure every display feature.</div>
+  <div class="spec-grid">
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#64a0ff"></span><h4>Windows Display Feature Support</h4></div>
+      <div class="wp-row"><span class="wk">165Hz refresh</span><span class="wv"><span class="wp-pill y">Manual</span> Settings → Advanced display → 165Hz</span></div>
+      <div class="wp-row"><span class="wk">Dolby Vision HDR</span><span class="wv"><span class="wp-pill g">✓ FULL</span> Settings → Display → Use HDR → On</span></div>
+      <div class="wp-row"><span class="wk">G-Sync Compatible</span><span class="wv"><span class="wp-pill g">✓</span> NVIDIA Control Panel → G-SYNC → Enable</span></div>
+      <div class="wp-row"><span class="wk">VRR (Variable Rate)</span><span class="wv"><span class="wp-pill g">✓</span> Win 11 Advanced Display → VRR On</span></div>
+      <div class="wp-row"><span class="wk">Auto HDR</span><span class="wv"><span class="wp-pill b">Win 11</span> Settings → Display → HDR → Auto HDR</span></div>
+      <div class="wp-row"><span class="wk">Night Light</span><span class="wv"><span class="wp-pill g">✓</span> Settings → Display → Night Light</span></div>
+      <div class="wp-row"><span class="wk">ICC Color Profile</span><span class="wv"><span class="wp-pill g">✓</span> Control Panel → Color Management</span></div>
+    </div>
+    <div class="wp-card">
+      <div class="wp-card-hdr"><span class="wd" style="background:#bb9af7"></span><h4>165Hz + G-Sync Setup Checklist</h4></div>
+      <div class="wp-row"><span class="wk">Step 1</span><span class="wv">Settings → Advanced display → Refresh rate: 165Hz</span></div>
+      <div class="wp-row"><span class="wk">Step 2</span><span class="wv">NVIDIA Control Panel → Set up G-SYNC → Enable</span></div>
+      <div class="wp-row"><span class="wk">Step 3</span><span class="wv">Manage 3D Settings → Vertical sync → Off (G-SYNC handles it)</span></div>
+      <div class="wp-row"><span class="wk">Step 4</span><span class="wv">Cap in-game FPS to ~160 (prevents hitting 165 limit)</span></div>
+      <div class="wp-row"><span class="wk">Step 5</span><span class="wv">Settings → Display → Use HDR → On (if using HDR content)</span></div>
+      <div class="wp-row"><span class="wk">Netflix Dolby Vision</span><span class="wv">Use Microsoft Edge browser (only browser with DV on Windows)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP GUIDE -->
+<div class="wp-sec" id="wp-guide">
+  <div class="wp-sec-title">Post-Install Setup Guide — Windows</div>
+  <div class="wp-sec-desc">Everything to do after a fresh Windows install on this machine. Follow this order — especially the driver sequence.</div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">01</div><div class="wp-step-title">Disable Automatic Driver Updates Before Anything</div><div class="wp-step-badge req">Required</div></div>
+    <div class="wp-step-body">
+      <p>Stop Windows from overwriting your NVIDIA driver with a generic version. Do this <strong>before</strong> first Windows Update run.</p>
+      <div class="wp-cmd">Settings → Windows Update → Advanced options → Optional updates → OFF
+Control Panel → System → Advanced → Hardware → Device Installation Settings
+→ "No (your device might not work as expected)" → Save</div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">02</div><div class="wp-step-title">AMD Chipset → NVIDIA GPU → Lenovo Vantage</div><div class="wp-step-badge req">Required</div></div>
+    <div class="wp-step-body">
+      <p>Install in this exact order. Reboot between each step.</p>
+      <div class="wp-cl">
+        <div class="wp-cl-item ok"><strong>amd.com/en/support</strong> → Ryzen 5000 Series Mobile → Chipset Driver → install + reboot</div>
+        <div class="wp-cl-item ok"><strong>nvidia.com/Download</strong> → RTX 3060 Laptop GPU → Custom Install → Clean Installation → reboot</div>
+        <div class="wp-cl-item ok"><strong>support.lenovo.com</strong> → Legion 5 15ACH6H → install Vantage + Hotkeys + Nahimic Audio → reboot</div>
+        <div class="wp-cl-item ok"><strong>intel.com</strong> → AX200 Wi-Fi driver → install</div>
+        <div class="wp-cl-item">Run Windows Update last → check Optional Updates too</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">03</div><div class="wp-step-title">Set 165Hz Refresh Rate (Windows Defaults to 60Hz)</div><div class="wp-step-badge req">Required</div></div>
+    <div class="wp-step-body">
+      <div class="wp-cmd">Settings → System → Display → Advanced display settings
+→ Refresh rate: 165 Hz → Apply
+
+Also: Settings → System → Display → Use HDR → On
+→ Adjust "SDR content brightness" slider to ~60-70%</div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">04</div><div class="wp-step-title">Configure NVIDIA Control Panel + G-Sync</div><div class="wp-step-badge rec">Recommended</div></div>
+    <div class="wp-step-body">
+      <div class="wp-cl">
+        <div class="wp-cl-item ok">Display → Set up G-SYNC → Enable for fullscreen + windowed modes</div>
+        <div class="wp-cl-item ok">Manage 3D Settings → Power Management: Prefer Maximum Performance</div>
+        <div class="wp-cl-item ok">Low Latency Mode → Ultra (competitive games) or Off (DLSS games)</div>
+        <div class="wp-cl-item ok">Vertical Sync → Off (G-SYNC manages this)</div>
+        <div class="wp-cl-item">Enable Resizable BAR: BIOS F2 → Above 4G Decoding ON + Re-Size BAR ON</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">05</div><div class="wp-step-title">Enable Hardware-Accelerated GPU Scheduling + HAGS</div><div class="wp-step-badge rec">Recommended</div></div>
+    <div class="wp-step-body">
+      <div class="wp-cmd">Settings → System → Display → Graphics Settings
+→ Hardware-accelerated GPU scheduling → ON → Restart</div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">06</div><div class="wp-step-title">Configure Lenovo Vantage — Battery + Fan + RGB</div><div class="wp-step-badge rec">Recommended</div></div>
+    <div class="wp-step-body">
+      <div class="wp-cl">
+        <div class="wp-cl-item ok">Power tab → Battery → Conservation Mode ON (60% cap) or set 80% custom limit</div>
+        <div class="wp-cl-item ok">Power tab → Thermal Mode → default to Balanced for daily use</div>
+        <div class="wp-cl-item ok">Fan Curve → customize curve for your preferred noise/temp tradeoff</div>
+        <div class="wp-cl-item">Lighting → set 4-zone RGB colors to your preference</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wp-step">
+    <div class="wp-step-hdr"><div class="wp-step-num">07</div><div class="wp-step-title">Install Nahimic + Dolby Atmos (Optional but Worth It)</div><div class="wp-step-badge opt">Optional</div></div>
+    <div class="wp-step-body">
+      <p>Nahimic is already installed with the Lenovo audio driver. Open from system tray. For Dolby Atmos headphone spatial audio: install <strong>Dolby Access</strong> from Microsoft Store (free trial → purchase for permanent access).</p>
+    </div>
+  </div>
+
+</div><!-- end wp-guide -->
+
+</div><!-- end .container -->
+
+<div class="wp-footer">
+  Lenovo Legion 5 15ACH6H (82JU) · Ryzen 7 5800H · RTX 3060 130W · 165Hz Dolby Vision · Windows 10/11 Reference Guide · March 2026
+</div>
+
+</div>
+<!-- ══════════════════════ END WINDOWS PAGE ══════════════════════ -->
+
+<!-- ══════════════════════ MAIN SITE WRAPPER ══════════════════════ -->
+<div id="mainSite">
+<!-- ★ CP2077 JAPAN TICKER ★ -->
 <div id="cp-ticker"> <div class="ticker-track"> <span class="ticker-inner">
       ⬡&nbsp;ネオン都市&nbsp;//&nbsp;NIGHT CITY TERMINAL v2.77&nbsp;//&nbsp;危険&nbsp;//&nbsp;LEGION&nbsp;5&nbsp;·&nbsp;82JU&nbsp;//&nbsp;システム正常&nbsp;//&nbsp;JACKING&nbsp;IN...&nbsp;//&nbsp;サイバーパンク&nbsp;//&nbsp;⚡&nbsp;CACHYOS&nbsp;ACTIVE&nbsp;//&nbsp;RTX&nbsp;3060&nbsp;ONLINE&nbsp;//&nbsp;未来技術&nbsp;//&nbsp;WARNING:&nbsp;CORPO&nbsp;ICE&nbsp;DETECTED&nbsp;//&nbsp;軍団&nbsp;//&nbsp;NETRUNNER&nbsp;READY&nbsp;//&nbsp;ゲーミング&nbsp;//&nbsp;BREACH&nbsp;PROTOCOL&nbsp;ENGAGED&nbsp;//&nbsp;東京&nbsp;2077&nbsp;//&nbsp;電脳空間&nbsp;//&nbsp;
     </span> <span class="ticker-inner" aria-hidden="true">
@@ -170,7 +793,8 @@ document.addEventListener('keydown', lofiAutoStart);</script>
 </div> <style>.nav-wrapper{max-width:1120px;margin:0 auto}.nav-inner{overflow-x:auto;scrollbar-width:none;padding:10px 0;display:flex;gap:4px}.nav-inner::-webkit-scrollbar{display:none}</style>
 <div class="sticky-nav" id="stickyNav">
 <div class="nav-wrapper">
-<div class="nav-inner"> <button class="nav-btn active" data-target="all">All</button> <button class="nav-btn" data-target="overview">Overview</button> <button class="nav-btn" data-target="cpu">CPU</button> <button class="nav-btn" data-target="gpu">GPU</button> <button class="nav-btn" data-target="display">Display</button> <button class="nav-btn" data-target="platform">Platform</button> <button class="nav-btn" data-target="cachyos">CachyOS</button> <button class="nav-btn" data-target="gaming">Gaming on Linux</button> <button class="nav-btn" data-target="gpu-modes">GPU Modes</button> <button class="nav-btn" data-target="fancurve">Fan Curves</button> <button class="nav-btn" data-target="battery">Battery</button> <button class="nav-btn" data-target="tips">Tips & Commands</button> <button class="nav-btn nav-btn-icon" data-target="setup-guide" title="Setup Guide">⚡<span class="nav-icon-tooltip">POST-INSTALL SETUP GUIDE</span></button> </div>
+<div class="nav-inner"> <button class="nav-btn active" data-target="all">All</button> <button class="nav-btn" data-target="overview">Overview</button> <button class="nav-btn" data-target="cpu">CPU</button> <button class="nav-btn" data-target="gpu">GPU</button> <button class="nav-btn" data-target="display">Display</button> <button class="nav-btn" data-target="platform">Platform</button> <button class="nav-btn" data-target="cachyos">CachyOS</button> <button class="nav-btn" data-target="gaming">Gaming on Linux</button> <button class="nav-btn" data-target="gpu-modes">GPU Modes</button> <button class="nav-btn" data-target="fancurve">Fan Curves</button> <button class="nav-btn" data-target="battery">Battery</button> <button class="nav-btn" data-target="tips">Tips & Commands</button> <button class="nav-btn nav-btn-icon" data-target="setup-guide" title="Setup Guide">⚡<span class="nav-icon-tooltip">POST-INSTALL SETUP GUIDE</span></button>
+        <button class="nav-btn-os" onclick="showWelcome()">🪟 SWITCH OS</button> </div>
 </div>
 </div> <div class="container"> <div class="section" data-section="overview"> <div class="section-title">Machine Overview</div> <div class="section-desc">Your full machine at a glance — official model, chassis, and key specifications confirmed from Lenovo PSREF.</div> <div class="spec-grid"> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:#FF6B6B"></span> <h4>Identity</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">Product Line</span><span class="v">Lenovo Legion 5</span></div> <div class="spec-row"><span class="k">Full Model Name</span><span class="v">Legion 5 15ACH6H</span></div> <div class="spec-row"><span class="k">Machine Type</span><span class="v">82JU</span></div> <div class="spec-row"><span class="k">Generation</span><span class="v">Gen 6 (2021)</span></div> <div class="spec-row"><span class="k">Chassis Size</span><span class="v">15.6" — Plastic chassis</span></div> <div class="spec-row"><span class="k">Dimensions</span><span class="v">363 × 260 × 22.5–24.6 mm</span></div> <div class="spec-row"><span class="k">Weight</span><span class="v">~2.4 kg (5.29 lbs)</span></div> <div class="spec-row"><span class="k">BIOS Versions</span><span class="v">GKCN58WW · GKCN57WW</span></div> <div class="spec-row"><span class="k">Operating System</span><span class="v"><span class="tag-yellow">CachyOS KDE</span></span></div> </div> </div> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:var(--accent)"></span> <h4>Key Components at a Glance</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">CPU</span><span class="v">AMD Ryzen 7 5800H — 8C/16T · 4.4 GHz</span></div> <div class="spec-row"><span class="k">dGPU</span><span class="v">NVIDIA GeForce RTX 3060 Laptop 130W</span></div> <div class="spec-row"><span class="k">iGPU</span><span class="v">AMD Radeon Vega 8 (integrated)</span></div> <div class="spec-row"><span class="k">RAM</span><span class="v">16 GB DDR4-3200 · 2× SO-DIMM · max 32 GB</span></div> <div class="spec-row"><span class="k">Storage</span><span class="v">M.2 2280 NVMe PCIe 3.0×4 (1 slot)</span></div> <div class="spec-row"><span class="k">Display</span><span class="v">15.6" FHD 165Hz IPS · Dolby Vision · DC Dimm</span></div> <div class="spec-row"><span class="k">Battery</span><span class="v">80 Wh · 300W charger (RTX 3060 model)</span></div> <div class="spec-row"><span class="k">Wi-Fi</span><span class="v">Wi-Fi 6 (802.11ax) · 2×2 · BT 5.1</span></div> </div> </div> </div>
 </div> <div class="section" data-section="cpu"> <div class="section-title">CPU — AMD Ryzen 7 5800H</div> <div class="section-desc">Zen 3 architecture — one of AMD's strongest mobile processors. On CachyOS, this CPU is served by x86-64-v3 optimized binaries and the BORE scheduler, both of which directly benefit this chip's 8-core design.</div> <div class="spec-grid"> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:#ff8a65"></span> <h4>Core Specifications</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">Architecture</span><span class="v">Zen 3 · 7nm TSMC</span></div> <div class="spec-row"><span class="k">Cores / Threads</span><span class="v">8 Cores · 16 Threads</span></div> <div class="spec-row"><span class="k">Base Clock</span><span class="v">3.2 GHz</span></div> <div class="spec-row"><span class="k">Boost Clock</span><span class="v">4.4 GHz (all-core ~3.8 GHz)</span></div> <div class="spec-row"><span class="k">L1 Cache</span><span class="v">32 KB/core (I) + 32 KB/core (D)</span></div> <div class="spec-row"><span class="k">L2 Cache</span><span class="v">4 MB (512 KB per core)</span></div> <div class="spec-row"><span class="k">L3 Cache</span><span class="v">16 MB (shared)</span></div> <div class="spec-row"><span class="k">Memory Support</span><span class="v">DDR4-3200 · Dual-channel</span></div> <div class="spec-row"><span class="k">PCIe Lanes</span><span class="v">PCIe 3.0 (CPU) + PCIe 3.0 (SoC)</span></div> </div> </div> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:#ff8a65"></span> <h4>Power &amp; Thermal</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">TDP (base)</span><span class="v">45W</span></div> <div class="spec-row"><span class="k">cTDP Range</span><span class="v">35W – 54W (configurable)</span></div> <div class="spec-row"><span class="k">Package Power</span><span class="v">Up to 54W sustained with Dynamic Boost</span></div> <div class="spec-row"><span class="k">Junction Temp (Tjmax)</span><span class="v">105 °C</span></div> <div class="spec-row"><span class="k">Typical Gaming Temp</span><span class="v">75–90 °C (depends on fan mode)</span></div> <div class="spec-row"><span class="k">Idle Temp (CachyOS)</span><span class="v">35–50 °C (amd-pstate active)</span></div> <div class="spec-row"><span class="k">TDP Control on Linux</span><span class="v"><code>ryzenadj</code> · <code>auto-cpufreq</code> · CoreCtrl</span></div> <div class="spec-row"><span class="k">Linux Driver</span><span class="v"><span class="tag-green">amd-pstate — mainline, zero setup</span></span></div> </div> </div> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:#ff8a65"></span> <h4>Integrated GPU (Vega 8)</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">Architecture</span><span class="v">GCN 5 (Vega)</span></div> <div class="spec-row"><span class="k">Compute Units</span><span class="v">8 CU · 512 Shaders</span></div> <div class="spec-row"><span class="k">Max Clock</span><span class="v">~2000 MHz (boost)</span></div> <div class="spec-row"><span class="k">VRAM</span><span class="v">Shared DDR4 (up to 512 MB reserved)</span></div> <div class="spec-row"><span class="k">API Support</span><span class="v">Vulkan 1.3 · OpenGL 4.6 · OpenCL 2.0</span></div> <div class="spec-row"><span class="k">Linux Driver</span><span class="v"><span class="tag-green">amdgpu — open source, mainline kernel</span></span></div> <div class="spec-row"><span class="k">Role on CachyOS</span><span class="v">Drives internal display in Hybrid GPU mode · saves battery</span></div> </div> </div> <div class="spec-card"> <div class="spec-card-header"> <span class="dot" style="background:var(--gold)"></span> <h4>CPU on CachyOS — What's Special</h4> </div> <div class="spec-rows"> <div class="spec-row"><span class="k">Binary Optimization</span><span class="v"><span class="tag-cyan">x86-64-v3 — AVX2, FMA, BMI2 enabled</span></span></div> <div class="spec-row"><span class="k">Compilation</span><span class="v">LTO + PGO + BOLT on key packages</span></div> <div class="spec-row"><span class="k">Scheduler</span><span class="v">BORE (Burst-Oriented Response Enhancer)</span></div> <div class="spec-row"><span class="k">Sched Extension</span><span class="v">sched-ext framework available</span></div> <div class="spec-row"><span class="k">BORE Benefit</span><span class="v">Lower frame-time variance under mixed game+background loads</span></div> <div class="spec-row"><span class="k">amd-pstate driver</span><span class="v">Active by default — smarter P-state control</span></div> <div class="spec-row"><span class="k">CPU Governor</span><span class="v"><code>performance</code> / <code>schedutil</code> — switch via <code>cpupower</code></span></div> </div> </div> </div> <div class="info-box cyan"> <strong>🔵 x86-64-v3 on Your CPU:</strong> The Ryzen 7 5800H fully supports the x86-64-v3 microarchitecture level, meaning it has AVX2, FMA, BMI2, MOVBE, and related extensions. CachyOS ships the entire package repo compiled against this target — so every binary from Proton to mesa to the browser is faster than what a generic x86_64 distro would give you on the same hardware. This is a real, measurable performance advantage exclusive to CachyOS on your machine.
@@ -621,7 +1245,7 @@ body.reduced-motion .score-fill { transition: width 0.3s ease !important; }
 /* ── 6. KEYBOARD SHORTCUT HUD ──────────────────────────────────────────────── */
 #kbdHud {
   position: fixed;
-  bottom: 135px; left: 24px;
+  bottom: 80px; right: 24px;
   z-index: 9997;
   background: rgba(3,3,10,0.97);
   border: 1px solid rgba(255,214,0,0.25);
@@ -657,11 +1281,11 @@ body.reduced-motion .score-fill { transition: width 0.3s ease !important; }
 }
 #kbdShowBtn {
   position: fixed;
-  bottom: 135px; left: 24px;
+  bottom: 80px; right: 24px;
   z-index: 9997;
   background: rgba(3,3,10,0.95);
-  border: 1px solid rgba(255,214,0,0.2);
-  color: rgba(255,214,0,0.45);
+  border: 1px solid rgba(255,214,0,0.5);
+  color: rgba(255,214,0,0.9);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 9px;
   letter-spacing: 2px;
@@ -976,5 +1600,190 @@ function closeEgg() {
 
 // ── TICKER COLOR CHANGE is handled in the kanji script above ──────────────────
 </script>
+</div><!-- end #mainSite -->
+<button id="sitethemebtn" style="display:none">🎨 THEME</button>
+<div id="sitethemepanel"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   THEMES
+══════════════════════════════════════════════ */
+const THEMES = {
+  'cyberpunk':   {label:'CYBERPUNK',  icon:'⬡', bc:'#FFD600', ba:'#FF003C'},
+  'tokyo-night': {label:'TOKYO NIGHT',icon:'🌆', bc:'#7aa2f7', ba:'#ff79c6'},
+  'matcha':      {label:'MATCHA',     icon:'🍵', bc:'#5a9e6b', ba:'#c8d96f'},
+  'nord':        {label:'CACHYOS NORD',icon:'❄️',bc:'#88c0d0', ba:'#5e81ac'},
+  'ocean':       {label:'OCEAN',      icon:'🌊', bc:'#00b4d8', ba:'#0077b6'},
+  'forest':      {label:'FOREST',     icon:'🌲', bc:'#52b788', ba:'#d4a017'},
+};
+
+function pickTheme(t) {
+  document.documentElement.setAttribute('data-theme', t === 'cyberpunk' ? '' : t);
+  if (t === 'cyberpunk') document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('l5-theme', t);
+  document.querySelectorAll('[data-t]').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  document.querySelectorAll('[data-st]').forEach(b => b.classList.toggle('on', b.dataset.st === t));
+  // sync boot bar color
+  const bar = document.getElementById('bootBar');
+  const T = THEMES[t] || THEMES.cyberpunk;
+  if (bar) { bar.style.background = `linear-gradient(90deg,${T.ba},${T.bc})`; bar.style.boxShadow = `0 0 8px ${T.bc}88`; }
+  const title = document.getElementById('bootTitle');
+  if (title) title.style.color = T.bc;
+}
+// Load on start
+(function(){ const t = localStorage.getItem('l5-theme') || 'cyberpunk'; pickTheme(t); })();
+
+/* ══════════════════════════════════════════════
+   WELCOME CANVAS
+══════════════════════════════════════════════ */
+(function(){
+  const c = document.getElementById('wlCanvas'); if(!c) return;
+  const ctx = c.getContext('2d'); let W,H,ps=[];
+  function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight; }
+  resize(); window.addEventListener('resize',resize,{passive:true});
+  class P { constructor(){this.reset(true)}
+    reset(i){ this.x=Math.random()*W; this.y=i?Math.random()*H:H+8;
+      this.sz=Math.random()*1.4+0.3; this.vy=-(Math.random()*0.4+0.1); this.vx=(Math.random()-.5)*0.2;
+      this.op=Math.random()*0.4+0.1; this.col=Math.random()>.7?'#FF003C':'#FFD600'; }
+    step(){this.y+=this.vy;this.x+=this.vx;if(this.y<-8)this.reset(false);}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.sz,0,Math.PI*2);ctx.fillStyle=this.col;ctx.globalAlpha=this.op;ctx.fill();ctx.globalAlpha=1;}
+  }
+  for(let i=0;i<55;i++)ps.push(new P());
+  function loop(){
+    if(!document.getElementById('welcomeOverlay')||document.getElementById('welcomeOverlay').classList.contains('fading')) return;
+    ctx.clearRect(0,0,W,H); ps.forEach(p=>{p.step();p.draw();}); requestAnimationFrame(loop);
+  }
+  loop();
+  // restart particles when welcome is shown again
+  window._restartWlCanvas = ()=>{ ps.forEach(p=>p.reset(true)); loop(); };
+})();
+
+/* ══════════════════════════════════════════════
+   BOOT + OS SELECTION
+══════════════════════════════════════════════ */
+function bootInto(os) {
+  const welcome = document.getElementById('welcomeOverlay');
+  const boot = document.getElementById('bootScreen');
+  const t = THEMES[localStorage.getItem('l5-theme')||'cyberpunk'] || THEMES.cyberpunk;
+
+  welcome.classList.add('fading');
+  setTimeout(()=>{ welcome.style.display='none'; boot.style.display='flex'; }, 650);
+
+  const msgs = {
+    cachyos:[
+      {t:'linux-cachyos kernel: LOADING',cls:'info'},
+      {t:'BORE scheduler: ACTIVE',cls:'ok'},
+      {t:'amd-pstate EPP driver: ENABLED',cls:'ok'},
+      {t:'NVIDIA module (RTX 3060 130W): LOADED',cls:'ok'},
+      {t:'legion-linux EC module: READY',cls:'ok'},
+      {t:'KDE Plasma 6 + Wayland: STARTING',cls:'ok'},
+      {t:'⚡ CachyOS · LEGION 5 · ONLINE',cls:'ok'},
+    ],
+    windows:[
+      {t:'Windows Boot Manager: INITIALIZING',cls:'info'},
+      {t:'AMD Chipset Driver: LOADED',cls:'ok'},
+      {t:'NVIDIA Game Ready Driver: LOADED',cls:'ok'},
+      {t:'Lenovo Vantage service: RUNNING',cls:'ok'},
+      {t:'Advanced Optimus: ENABLED',cls:'ok'},
+      {t:'Nahimic Audio DSP: ACTIVE',cls:'ok'},
+      {t:'⊞ Windows 10/11 · LEGION 5 · READY',cls:'ok'},
+    ]
+  };
+
+  const title = document.getElementById('bootTitle');
+  const bar = document.getElementById('bootBar');
+  const log = document.getElementById('bootLog');
+
+  title.textContent = os === 'cachyos' ? 'CACHYOS LINUX' : 'WINDOWS 10 / 11';
+  title.style.color = t.bc;
+  bar.style.background = `linear-gradient(90deg,${t.ba},${t.bc})`;
+  bar.style.boxShadow = `0 0 8px ${t.bc}88`;
+  bar.style.width = '0%';
+  log.innerHTML = '';
+
+  const list = msgs[os];
+  let i = 0;
+  const iv = setInterval(()=>{
+    if(i < list.length){
+      const d = document.createElement('div');
+      d.className = 'bl ' + (list[i].cls||'');
+      d.textContent = list[i].t;
+      log.appendChild(d);
+      bar.style.width = ((i+1)/list.length*100)+'%';
+      i++;
+    } else {
+      clearInterval(iv);
+      setTimeout(()=>{
+        boot.style.display='none';
+        if(os==='windows'){
+          document.getElementById('windowsPage').style.display='block';
+          document.getElementById('mainSite').style.display='none';
+        } else {
+          document.getElementById('mainSite').style.display='block';
+          document.getElementById('windowsPage').style.display='none';
+          setTimeout(triggerReveal, 80);
+          setTimeout(animateBars, 180);
+        }
+        document.getElementById('sitethemebtn').style.display='block';
+      },350);
+    }
+  },310);
+}
+
+function showWelcome(){
+  document.getElementById('windowsPage').style.display='none';
+  document.getElementById('mainSite').style.display='none';
+  document.getElementById('sitethemebtn').style.display='none';
+  const w = document.getElementById('welcomeOverlay');
+  w.style.display='flex'; w.classList.remove('fading'); w.style.opacity='';
+  if(window._restartWlCanvas) window._restartWlCanvas();
+}
+
+/* ══════════════════════════════════════════════
+   WINDOWS PAGE NAV
+══════════════════════════════════════════════ */
+document.querySelectorAll('.wp-nb').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.wp-nb').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const el = document.getElementById(btn.dataset.ws);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ══════════════════════════════════════════════
+   IN-SITE THEME SWITCHER (shown after OS selected)
+══════════════════════════════════════════════ */
+(function(){
+  const btn = document.getElementById('sitethemebtn');
+  const panel = document.getElementById('sitethemepanel');
+  if(!btn||!panel) return;
+  // build panel
+  const cur = localStorage.getItem('l5-theme')||'cyberpunk';
+  panel.innerHTML = '<div class="stp-title">SELECT THEME</div><div class="stp-grid">'+
+    Object.entries(THEMES).map(([k,v])=>
+      `<div class="stp-it ${k===cur?'on':''}" data-st="${k}" onclick="pickTheme('${k}')">`+
+      `<span class="stp-icon">${v.icon}</span>${v.label}</div>`
+    ).join('')+'</div>';
+  btn.onclick = ()=>{ panel.style.display = panel.style.display==='block'?'none':'block'; };
+  document.addEventListener('click',e=>{ if(!btn.contains(e.target)&&!panel.contains(e.target)) panel.style.display='none'; });
+})();
+
+/* ══════════════════════════════════════════════
+   HIDE FLOATING UI ON WELCOME SCREEN
+══════════════════════════════════════════════ */
+(function(){
+  // Hide lofi radio, back-to-top, kbd button on welcome screen
+  const floaters = ['lofiRadio','backToTop','kbdShowBtn'];
+  function updateVis(){
+    const onW = document.getElementById('welcomeOverlay').style.display !== 'none' &&
+                !document.getElementById('welcomeOverlay').classList.contains('fading');
+    floaters.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.visibility=onW?'hidden':'visible'; });
+  }
+  updateVis();
+  new MutationObserver(updateVis).observe(document.getElementById('welcomeOverlay'),{attributes:true,attributeFilter:['style','class']});
+})();
+</script>
+
 </body>
 </html>
